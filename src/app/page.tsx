@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { getGithubSnapshot } from "@/lib/github";
+import AgentSoulTeam from "./agent-soul-team";
 
 export const revalidate = 3600;
 
@@ -28,7 +29,7 @@ const agents = [
     description: "Evaluates opportunities through evidence, scenarios, and disciplined risk analysis.",
     tools: "fundamentals · macro · risk",
   },
-];
+] as const;
 
 function ArrowIcon() {
   return (
@@ -265,20 +266,7 @@ export default async function Home() {
             </span>
             <span className="nous-link">Visit Nous Research <ArrowIcon /></span>
           </a>
-          <div className="agent-topology">
-            {agents.map((agent, index) => (
-              <article className={`agent-card agent-${index}`} key={agent.name}>
-                <div className="agent-card-top"><span>0{index + 1}</span><i /></div>
-                <p className="agent-command">@{agent.name}</p>
-                <h3>{agent.role}</h3>
-                <p>{agent.description}</p>
-                <div className="agent-tools">{agent.tools}</div>
-              </article>
-            ))}
-            <svg className="connection-lines" viewBox="0 0 900 390" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M450 130V190M450 190H145V245M450 190V245M450 190H755V245" />
-            </svg>
-          </div>
+          <AgentSoulTeam agents={agents} />
           <div className="workflow-line">
             <span>Idea</span><i /><span>Decompose</span><i /><span>Research + build</span><i /><span>Review</span><i /><span>Working result</span>
           </div>
