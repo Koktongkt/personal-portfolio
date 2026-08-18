@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getGithubSnapshot } from "@/lib/github";
 import AgentSoulTeam from "./agent-soul-team";
+import PixelWave from "./pixel-wave";
 
 export const revalidate = 3600;
 
@@ -96,6 +97,7 @@ export default async function Home() {
       </header>
 
       <section className="hero section-shell" id="top">
+        <PixelWave />
         <div className="hero-copy">
           <p className="eyebrow"><span className="status-dot" /> Building at the edge of reality, software and AI</p>
           <h1>I build systems that make ambitious ideas <em>real.</em></h1>
