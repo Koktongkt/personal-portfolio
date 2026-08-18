@@ -280,7 +280,7 @@ export default async function Home() {
         <div className="now-grid">
           <h2>Currently<br />in motion.</h2>
           <div className="now-list">
-            <div><span>01</span><p>Building human-guided physical vision applications</p></div>
+            <div><span>01</span><p>Building agentic portfolio management</p></div>
             <div><span>02</span><p>Exploring durable multi-agent workflows</p></div>
             <div><span>03</span><p>Improving how AI systems collaborate with people</p></div>
           </div>
