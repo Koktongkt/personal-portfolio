@@ -96,8 +96,9 @@ export default async function Home() {
         <a className="header-cta" href="#contact">Let&apos;s talk <ArrowIcon /></a>
       </header>
 
+      <div className="hero-about-transition">
+      <PixelWave />
       <section className="hero section-shell" id="top">
-        <PixelWave />
         <div className="hero-copy">
           <p className="eyebrow"><span className="status-dot" /> Building at the edge of reality, software and AI</p>
           <h1>I build systems that make ambitious ideas <em>real.</em></h1>
@@ -146,6 +147,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
+      </div>
 
       <section className="work section-shell" id="work">
         <div className="section-heading">
@@ -203,7 +205,7 @@ export default async function Home() {
               </div>
               <div className="repo-grid">
                 {github.repositories.map((repo) => (
-                  <a className="repo-card" href={github.profileUrl} target="_blank" rel="noopener noreferrer" aria-label={`View ${github.username} on GitHub`} key={repo.name}>
+                  <a className="repo-card" href={repo.html_url} target="_blank" rel="noopener noreferrer" aria-label={`View ${repo.name} on GitHub`} key={repo.name}>
                     <div className="repo-card-top"><span className="repo-icon" aria-hidden="true" /><ArrowIcon /></div>
                     <h3>{repo.name}</h3>
                     <p>{repo.description || "An open-source project from my GitHub workspace."}</p>
@@ -222,7 +224,7 @@ export default async function Home() {
               {github.activities.length > 0 ? (
                 <div className="activity-list">
                   {github.activities.map((activity) => (
-                    <a href={github.profileUrl} target="_blank" rel="noopener noreferrer" aria-label={`View ${github.username} on GitHub`} key={activity.id}>
+                    <a href={activity.url} target="_blank" rel="noopener noreferrer" aria-label={`View ${activity.repo} on GitHub`} key={activity.id}>
                       <span className="activity-dot" />
                       <span className="activity-copy">
                         <span>{activity.action}</span>
