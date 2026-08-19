@@ -6,9 +6,10 @@ type Pixel = {
   column: number;
   row: number;
   layer: number;
-  headX: number;
-  headY: number;
-  headEdge: boolean;
+  sphereX: number;
+  sphereY: number;
+  sphereZ: number;
+  sphereSeed: number;
   offsetX: number;
   offsetY: number;
   velocityX: number;
@@ -25,68 +26,11 @@ const LAYERS = [
 const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(maximum, Math.max(minimum, value));
 
-type HeadPoint = { x: number; y: number; edge: boolean };
-
-function createPortraitPoints(): HeadPoint[] {
-  const mask = document.createElement("canvas");
-  const maskWidth = 300;
-  const maskHeight = 380;
-  mask.width = maskWidth;
-  mask.height = maskHeight;
-  const maskContext = mask.getContext("2d");
-  if (!maskContext) return [];
-
-  maskContext.fillStyle = "#fff";
-
-  // A calm side-profile bust with one continuous, readable contour.
-  maskContext.beginPath();
-  maskContext.moveTo(182, 18);
-  maskContext.bezierCurveTo(122, 15, 84, 54, 79, 111);
-  maskContext.bezierCurveTo(77, 137, 69, 157, 56, 178);
-  maskContext.lineTo(42, 195);
-  maskContext.bezierCurveTo(38, 201, 46, 205, 59, 207);
-  maskContext.bezierCurveTo(54, 213, 57, 219, 66, 223);
-  maskContext.bezierCurveTo(58, 227, 60, 234, 70, 238);
-  maskContext.bezierCurveTo(75, 255, 91, 270, 111, 278);
-  maskContext.bezierCurveTo(121, 305, 112, 337, 94, 378);
-  maskContext.lineTo(278, 378);
-  maskContext.bezierCurveTo(251, 345, 235, 313, 240, 281);
-  maskContext.bezierCurveTo(282, 253, 302, 204, 296, 142);
-  maskContext.bezierCurveTo(290, 65, 247, 21, 182, 18);
-  maskContext.closePath();
-  maskContext.fill();
-
-  const pixels = maskContext.getImageData(0, 0, maskWidth, maskHeight).data;
-  const isFilled = (x: number, y: number) =>
-    x >= 0 && x < maskWidth && y >= 0 && y < maskHeight && pixels[(y * maskWidth + x) * 4 + 3] > 0;
-  const points: HeadPoint[] = [];
-
-  for (let y = 2; y < maskHeight; y += 4) {
-    for (let x = 2; x < maskWidth; x += 4) {
-      if (!isFilled(x, y)) continue;
-      const edge = !isFilled(x - 7, y) || !isFilled(x + 7, y) || !isFilled(x, y - 7) || !isFilled(x, y + 7);
-      points.push({ x: x / maskWidth, y: y / maskHeight, edge });
-    }
-  }
-
-  const bounds = points.reduce(
-    (result, point) => ({
-      minimumX: Math.min(result.minimumX, point.x),
-      maximumX: Math.max(result.maximumX, point.x),
-      minimumY: Math.min(result.minimumY, point.y),
-      maximumY: Math.max(result.maximumY, point.y),
-    }),
-    { minimumX: 1, maximumX: 0, minimumY: 1, maximumY: 0 },
-  );
-  const shapeWidth = Math.max(0.001, bounds.maximumX - bounds.minimumX);
-  const shapeHeight = Math.max(0.001, bounds.maximumY - bounds.minimumY);
-
-  return points.map((point) => ({
-    x: (point.x - bounds.minimumX) / shapeWidth,
-    y: (point.y - bounds.minimumY) / shapeHeight,
-    edge: point.edge,
-  }));
-}
+const hashUnit = (value: number) => {
+  let hashed = Math.imul(value ^ (value >>> 16), 0x45d9f3b);
+  hashed = Math.imul(hashed ^ (hashed >>> 16), 0x45d9f3b);
+  return ((hashed ^ (hashed >>> 16)) >>> 0) / 4294967295;
+};
 
 export default function PixelWave() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -101,12 +45,14 @@ export default function PixelWave() {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const coarsePointer = window.matchMedia("(pointer: coarse)");
     const pixels: Pixel[] = [];
-    const headPoints = createPortraitPoints();
     const pointer = { x: -1000, y: -1000, active: false };
     let width = 0;
     let height = 0;
     let aboutTop = 0;
     let aboutHeight = 0;
+    let sphereCenterX = 0;
+    let sphereCenterY = 0;
+    let sphereDiameter = 320;
     let morph = 0;
     let morphTarget = 0;
     let animationFrame = 0;
@@ -135,9 +81,10 @@ export default function PixelWave() {
               column,
               row,
               layer: layerIndex,
-              headX: 0,
-              headY: 0,
-              headEdge: false,
+              sphereX: 0,
+              sphereY: 0,
+              sphereZ: 0,
+              sphereSeed: 0,
               offsetX: 0,
               offsetY: 0,
               velocityX: 0,
@@ -148,24 +95,23 @@ export default function PixelWave() {
       });
 
       const compactLayout = width < 900;
-      const headWidth = width < 640
-        ? Math.min(240, width * 0.62)
+      sphereDiameter = width < 640
+        ? Math.min(230, width * 0.6)
         : compactLayout
-          ? 270
-          : clamp(width * 0.27, 320, 360);
-      const headHeight = headWidth * 1.27;
-      const headCenterX = compactLayout ? width * 0.68 : width * 0.89;
-      const headLeft = headCenterX - headWidth / 2;
-      const headTop = compactLayout
-        ? aboutTop + aboutHeight - headHeight - 58
-        : aboutTop + clamp(aboutHeight * 0.16, 75, 145);
-
+          ? 260
+          : clamp(width * 0.212, 280, 300);
+      sphereCenterX = compactLayout ? width * 0.68 : width * 0.895;
+      sphereCenterY = compactLayout
+        ? aboutTop + aboutHeight - sphereDiameter / 2 - 58
+        : aboutTop + clamp(aboutHeight * 0.16, 75, 145) + sphereDiameter / 2;
       pixels.forEach((pixel, index) => {
-        const point = headPoints[((index * 2654435761) >>> 0) % headPoints.length];
-        if (!point) return;
-        pixel.headX = headLeft + point.x * headWidth;
-        pixel.headY = headTop + point.y * headHeight;
-        pixel.headEdge = point.edge;
+        const normalizedY = 1 - hashUnit(index + 1) * 2;
+        const radialScale = Math.sqrt(Math.max(0, 1 - normalizedY * normalizedY));
+        const angle = hashUnit(index + 1731) * Math.PI * 2;
+        pixel.sphereX = Math.cos(angle) * radialScale * sphereDiameter / 2;
+        pixel.sphereY = normalizedY * sphereDiameter / 2;
+        pixel.sphereZ = Math.sin(angle) * radialScale;
+        pixel.sphereSeed = hashUnit(index + 9013);
       });
     };
 
@@ -187,6 +133,9 @@ export default function PixelWave() {
       morph = reducedMotion.matches
         ? morphTarget
         : morph + (morphTarget - morph) * (1 - 0.86 ** delta);
+      const sphereRotation = reducedMotion.matches ? 0.4 : elapsed * 0.38;
+      const rotationCosine = Math.cos(sphereRotation);
+      const rotationSine = Math.sin(sphereRotation);
 
       for (const pixel of pixels) {
         const layer = LAYERS[pixel.layer];
@@ -201,10 +150,13 @@ export default function PixelWave() {
         const secondaryWave = Math.sin(phase * 0.47 + pixel.row * 0.54 + pixel.layer * 0.8) * 0.24;
         const waveEnergy = clamp((primaryWave + secondaryWave + 1.24) / 2.48, 0, 1);
         const baseY = bandCenter + rowOffset + (primaryWave + secondaryWave) * layer.amplitude;
-        const headMotionX = Math.sin(elapsed * 0.8 + pixel.headY * 0.012) * 1.2 * morph;
-        const headMotionY = Math.sin(elapsed * 1.05 + pixel.headX * 0.01) * 0.9 * morph;
-        const originX = baseX + (pixel.headX + headMotionX - baseX) * morph;
-        const originY = baseY + (pixel.headY + headMotionY - baseY) * morph;
+        const rotatedX = pixel.sphereX * rotationCosine + pixel.sphereZ * sphereDiameter / 2 * rotationSine;
+        const rotatedZ = -pixel.sphereX / (sphereDiameter / 2) * rotationSine + pixel.sphereZ * rotationCosine;
+        const perspective = 1 + rotatedZ * 0.055;
+        const sphereX = sphereCenterX + rotatedX * perspective;
+        const sphereY = sphereCenterY + pixel.sphereY * perspective;
+        const originX = baseX + (sphereX - baseX) * morph;
+        const originY = baseY + (sphereY - baseY) * morph;
 
         let targetX = 0;
         let targetY = 0;
@@ -236,17 +188,22 @@ export default function PixelWave() {
         const edgeFade = clamp(Math.min(originX / 110, (width - originX) / 110), 0, 1);
         const crestGlow = 0.72 + waveEnergy * 0.48;
         const waveAlpha = layer.alpha * rowFade * edgeFade * crestGlow;
-        const headAlpha = (pixel.headEdge ? 0.72 : 0.03) * edgeFade;
-        const alpha = waveAlpha + (headAlpha - waveAlpha) * morph;
+        const frontVisibility = clamp((rotatedZ + 0.08) / 0.16, 0, 1);
+        const frontEase = frontVisibility * frontVisibility * (3 - 2 * frontVisibility);
+        const horizontalShade = rotatedX / Math.max(1, sphereDiameter / 2);
+        const verticalShade = pixel.sphereY / Math.max(1, sphereDiameter / 2);
+        const stippleShade = clamp(0.26 + horizontalShade * 0.2 + verticalShade * 0.26 + pixel.sphereSeed * 0.2, 0.08, 0.84);
+        const rim = (1 - Math.max(0, rotatedZ)) ** 3 * 0.2;
+        const sphereAlpha = (0.1 + stippleShade * 0.66 + rim) * frontEase * edgeFade;
+        const alpha = waveAlpha + (sphereAlpha - waveAlpha) * morph;
         const waveAccent = clamp((waveEnergy - 0.58) * 0.72 + pixel.layer * 0.035, 0, 0.48);
-        const headAccent = pixel.headEdge ? 0.1 : 0.02;
-        const accentMix = clamp(waveAccent + (headAccent - waveAccent) * morph + pointerEnergy * 0.35, 0, 0.6);
+        const accentMix = clamp(waveAccent * (1 - morph) + pointerEnergy * 0.35, 0, 0.6);
         const red = Math.round(229 + (199 - 229) * accentMix);
         const green = Math.round(230 + (255 - 230) * accentMix);
         const blue = Math.round(232 + (74 - 232) * accentMix);
         const waveSize = layer.size + (pixel.layer > 1 && waveEnergy > 0.72 ? 1 : 0);
-        const headSize = pixel.headEdge ? 4 : 2;
-        const size = Math.round(waveSize + (headSize - waveSize) * morph);
+        const sphereSize = 1 + Math.round(pixel.sphereSeed * 1.6 + Math.max(0, rotatedZ) * 0.8);
+        const size = Math.max(1, Math.round(waveSize + (sphereSize - waveSize) * morph));
         const drawX = Math.round(originX + pixel.offsetX);
         const drawY = Math.round(originY + pixel.offsetY);
 
@@ -257,6 +214,24 @@ export default function PixelWave() {
 
         context.fillStyle = `rgba(${red}, ${green}, ${blue}, ${alpha})`;
         context.fillRect(drawX, drawY, size, size);
+
+        if (morph > 0.2 && frontEase > 0.05) {
+          const detailAngle = pixel.sphereSeed * Math.PI * 2;
+          const detailAlpha = sphereAlpha * morph * 0.46;
+          context.fillStyle = `rgba(229, 230, 232, ${detailAlpha})`;
+          context.fillRect(
+            Math.round(drawX + Math.cos(detailAngle) * 3.2),
+            Math.round(drawY + Math.sin(detailAngle) * 3.2),
+            1,
+            1,
+          );
+          context.fillRect(
+            Math.round(drawX - Math.sin(detailAngle) * 2.1),
+            Math.round(drawY + Math.cos(detailAngle) * 2.1),
+            1,
+            1,
+          );
+        }
       }
 
       if (!reducedMotion.matches && !document.hidden) {
