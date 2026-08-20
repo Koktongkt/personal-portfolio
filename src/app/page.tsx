@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { getGithubSnapshot } from "@/lib/github";
 import AgentSoulTeam from "./agent-soul-team";
-import PixelWave from "./pixel-wave";
+import Orb from "./orb";
+import Threads from "./threads";
 
 export const revalidate = 3600;
 
@@ -96,9 +97,15 @@ export default async function Home() {
         <a className="header-cta" href="#contact">Let&apos;s talk <ArrowIcon /></a>
       </header>
 
-      <div className="hero-about-transition">
-      <PixelWave />
       <section className="hero section-shell" id="top">
+        <Threads
+          className="threads-backdrop"
+          color={[1, 1, 1]}
+          amplitude={1.5}
+          distance={0.3}
+          enableMouseInteraction
+          aria-hidden="true"
+        />
         <div className="hero-copy">
           <p className="eyebrow"><span className="status-dot" /> Building at the edge of reality, software and AI</p>
           <h1>I build systems that make ambitious ideas <em>real.</em></h1>
@@ -138,6 +145,15 @@ export default async function Home() {
       </section>
 
       <section className="manifesto section-shell" id="about">
+        <div className="about-orb" aria-hidden="true">
+          <Orb
+            hue={50}
+            hoverIntensity={0.5}
+            rotateOnHover
+            forceHoverState={false}
+            backgroundColor="#0a0a0b"
+          />
+        </div>
         <p className="section-number">01 / ABOUT</p>
         <div className="manifesto-grid">
           <h2>Curious by default.<br />Practical by design.</h2>
@@ -147,7 +163,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-      </div>
 
       <section className="work section-shell" id="work">
         <div className="section-heading">

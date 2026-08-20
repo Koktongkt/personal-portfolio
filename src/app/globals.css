@@ -61,11 +61,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline
 .site-header nav a:hover, .footer a:hover { color: var(--accent); }
 .header-cta { justify-self: end; display: flex; align-items: center; gap: 9px; font-size: 14px; }
 
-.hero-about-transition { position: relative; isolation: isolate; }
 .hero, .manifesto { position: relative; z-index: 1; }
 .hero { min-height: 730px; display: grid; grid-template-columns: 1.08fr .92fr; gap: 80px; align-items: center; padding-block: 90px 110px; }
 .hero-copy, .terminal-wrap { position: relative; z-index: 1; min-width: 0; }
-.pixel-wave { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; opacity: .92; -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.5) 13%, #000 36%, rgba(0,0,0,.82) 88%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.5) 13%, #000 36%, rgba(0,0,0,.82) 88%, transparent 100%); }
+.threads-container.threads-backdrop { position: absolute; inset: 0 50% 0 auto; z-index: 0; width: 100vw; pointer-events: none; opacity: .80; transform: translateX(50%); -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 20%, #000 78%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 20%, #000 78%, transparent 100%); }
 .eyebrow, .section-number { font-family: var(--font-geist-mono), monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
 .eyebrow { max-width: 100%; color: #b4b4b8; display: flex; align-items: center; gap: 10px; line-height: 1.6; }
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 60%, transparent); }
@@ -103,6 +102,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline
 @keyframes blink { 50% { opacity: 0; } }
 
 .manifesto { padding-block: 125px; border-top: 1px solid var(--line); }
+.about-orb { position: absolute; top: 160px; right: -160px; z-index: 0; width: 360px; height: 360px; }
+.manifesto > .section-number, .manifesto-grid { position: relative; z-index: 1; }
 .section-number { color: #77777d; margin-bottom: 50px; }
 .manifesto-grid, .now-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 90px; }
 .manifesto-grid { grid-template-columns: minmax(0, 1.08fr) minmax(300px, .72fr) minmax(170px, .38fr); gap: 50px; }
@@ -269,6 +270,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline
   .terminal { transform: none; }
   .section-heading, .manifesto-grid, .now-grid, .hermes-intro { grid-template-columns: 1fr; gap: 45px; }
   .manifesto { padding-bottom: 300px; }
+  .about-orb { top: auto; right: 0; bottom: 35px; width: 260px; height: 260px; }
   .manifesto-grid > div { grid-column: auto; }
   .section-heading > p { max-width: 500px; }
   .agent-topology { gap: 70px 18px; }
@@ -286,7 +288,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline
   .hero { min-height: auto; padding-block: 74px 90px; }
   .eyebrow { align-items: flex-start; font-size: 9px; letter-spacing: .12em; }
   .status-dot { flex: 0 0 auto; margin-top: 4px; }
-  .pixel-wave { opacity: .68; }
+  .threads-container.threads-backdrop { opacity: .80; }
+  .about-orb { right: 0; bottom: 50px; width: 230px; height: 230px; }
   .hero h1 { margin-top: 20px; font-size: clamp(44px, 13vw, 58px); line-height: .98; }
   .hero-lede { font-size: 16px; }
   .hero-actions { flex-direction: column; align-items: stretch; }
