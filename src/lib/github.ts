@@ -2,17 +2,6 @@ const GITHUB_USERNAME = "Koktongkt";
 const GITHUB_API = "https://api.github.com";
 const CONTRIBUTIONS_API = "https://github-contributions-api.jogruber.de/v4";
 
-export type GithubRepo = {
-  name: string;
-  html_url: string;
-  description: string | null;
-  language: string | null;
-  stargazers_count: number;
-  forks_count: number;
-  fork: boolean;
-  updated_at: string;
-};
-
 type GithubProfile = {
   public_repos: number;
 };
@@ -54,8 +43,6 @@ export type GithubSnapshot = {
   publicRepos: number;
   contributionTotal: number;
   contributions: Contribution[];
-  repositories: GithubRepo[];
-  repositoryLabel: "Pinned repositories" | "Recently updated";
   activities: GithubActivity[];
 };
 
@@ -80,31 +67,6 @@ async function fetchJson<T>(url: string, fallback: T): Promise<T> {
   } catch {
     return fallback;
   }
-}
-
-async function fetchProfileHtml(): Promise<string> {
-  try {
-    const response = await fetch(`https://github.com/${GITHUB_USERNAME}`, {
-      headers: { "User-Agent": requestHeaders["User-Agent"] },
-      next: { revalidate: 3600 },
-      signal: AbortSignal.timeout(8000),
-    });
-
-    return response.ok ? response.text() : "";
-  } catch {
-    return "";
-  }
-}
-
-function getPinnedNames(profileHtml: string): string[] {
-  const matches = profileHtml.matchAll(
-    new RegExp(
-      `pinned-item-list-item[\\s\\S]{0,2500}?href="\\/${GITHUB_USERNAME}\\/([^"?#]+)"`,
-      "g",
-    ),
-  );
-
-  return Array.from(matches, (match) => match[1]).slice(0, 6);
 }
 
 function describeEvent(event: GithubEvent): string {
@@ -153,12 +115,8 @@ function selectActivities(events: GithubEvent[]): GithubActivity[] {
 }
 
 export async function getGithubSnapshot(): Promise<GithubSnapshot> {
-  const [profile, repos, events, contributionData, profileHtml] = await Promise.all([
+  const [profile, events, contributionData] = await Promise.all([
     fetchJson<GithubProfile>(`${GITHUB_API}/users/${GITHUB_USERNAME}`, { public_repos: 0 }),
-    fetchJson<GithubRepo[]>(
-      `${GITHUB_API}/users/${GITHUB_USERNAME}/repos?per_page=100&sort=updated`,
-      [],
-    ),
     fetchJson<GithubEvent[]>(
       `${GITHUB_API}/users/${GITHUB_USERNAME}/events/public?per_page=30`,
       [],
@@ -167,14 +125,7 @@ export async function getGithubSnapshot(): Promise<GithubSnapshot> {
       `${CONTRIBUTIONS_API}/${GITHUB_USERNAME}?y=last`,
       { total: {}, contributions: [] },
     ),
-    fetchProfileHtml(),
   ]);
-
-  const pinnedNames = getPinnedNames(profileHtml);
-  const pinnedRepos = pinnedNames
-    .map((name) => repos.find((repo) => repo.name.toLowerCase() === name.toLowerCase()))
-    .filter((repo): repo is GithubRepo => Boolean(repo));
-  const fallbackRepos = repos.filter((repo) => !repo.fork).slice(0, 4);
 
   return {
     username: GITHUB_USERNAME,
@@ -182,8 +133,6 @@ export async function getGithubSnapshot(): Promise<GithubSnapshot> {
     publicRepos: profile.public_repos,
     contributionTotal: contributionData.total.lastYear || 0,
     contributions: contributionData.contributions,
-    repositories: pinnedRepos.length > 0 ? pinnedRepos : fallbackRepos,
-    repositoryLabel: pinnedRepos.length > 0 ? "Pinned repositories" : "Recently updated",
     activities: selectActivities(events),
   };
 }
