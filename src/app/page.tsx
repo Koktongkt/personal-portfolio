@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { getGithubSnapshot } from "@/lib/github";
 import AgentSoulTeam from "./agent-soul-team";
+import FeaturedProjects from "./featured-projects";
+import { ArrowIcon, GithubIcon } from "./icons";
 import Orb from "./orb";
 import Threads from "./threads";
 
@@ -32,22 +34,6 @@ const agents = [
     tools: "fundamentals · macro · risk",
   },
 ] as const;
-
-function ArrowIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16" fill="none">
-      <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function GithubIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-      <path d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56v-2.23c-3.22.7-3.9-1.37-3.9-1.37-.52-1.34-1.29-1.69-1.29-1.69-1.05-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.72 1.27 3.39.97.1-.75.4-1.27.74-1.56-2.57-.29-5.27-1.28-5.27-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.16 1.18a10.96 10.96 0 0 1 5.76 0c2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.71 5.38-5.29 5.67.42.36.79 1.06.79 2.14v3.17c0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .7Z" />
-    </svg>
-  );
-}
 
 function XIcon() {
   return (
@@ -144,7 +130,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="manifesto section-shell" id="about">
+      <section className="manifesto" id="about">
         <div className="about-orb" aria-hidden="true">
           <Orb
             hue={50}
@@ -154,12 +140,14 @@ export default async function Home() {
             backgroundColor="#0a0a0b"
           />
         </div>
-        <p className="section-number">01 / ABOUT</p>
-        <div className="manifesto-grid">
-          <h2>Curious by default.<br />Practical by design.</h2>
-          <div>
-            <p>I enjoy turning fuzzy, ambitious ideas into systems people can actually use. My work moves between product engineering, AI research, and hands-on experimentation.</p>
-            <p className="muted">This page is my discovery space as a problem-solver: a running log of what I’m building, what I’m learning, and the tools I’m shaping along the way.</p>
+        <div className="section-shell">
+          <p className="section-number">01 / ABOUT</p>
+          <div className="manifesto-grid">
+            <h2>Curious by default.<br />Practical by design.</h2>
+            <div>
+              <p>I enjoy turning fuzzy, ambitious ideas into systems people can actually use. My work moves between product engineering, AI research, and hands-on experimentation.</p>
+              <p className="muted">This page is my discovery space as a problem-solver: a running log of what I’m building, what I’m learning, and the tools I’m shaping along the way.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -167,8 +155,10 @@ export default async function Home() {
       <section className="work section-shell" id="work">
         <div className="section-heading">
           <div><p className="section-number">02 / SELECTED WORK</p><h2>A few things worth<br />opening up.</h2></div>
-          <p>Live view of what I&apos;m building and shipping on GitHub.</p>
+          <p>Things you can open and try right now, plus a live view of what I&apos;m shipping on GitHub.</p>
         </div>
+
+        <FeaturedProjects />
 
         <div className="github-pulse">
           <div className="github-pulse-header">
@@ -213,33 +203,12 @@ export default async function Home() {
           </div>
 
           <div className="github-content-grid">
-            <div className="repo-panel">
-              <div className="github-panel-label">
-                <span>{github.repositoryLabel}</span>
-                <a href={github.profileUrl} target="_blank" rel="noopener noreferrer">View all <ArrowIcon /></a>
-              </div>
-              <div className="repo-grid">
-                {github.repositories.map((repo) => (
-                  <a className="repo-card" href={repo.html_url} target="_blank" rel="noopener noreferrer" aria-label={`View ${repo.name} on GitHub`} key={repo.name}>
-                    <div className="repo-card-top"><span className="repo-icon" aria-hidden="true" /><ArrowIcon /></div>
-                    <h3>{repo.name}</h3>
-                    <p>{repo.description || "An open-source project from my GitHub workspace."}</p>
-                    <div className="repo-meta">
-                      {repo.language && <span><i />{repo.language}</span>}
-                      <span>☆ {repo.stargazers_count}</span>
-                      <span>⑂ {repo.forks_count}</span>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            </div>
-
             <div className="activity-panel">
               <div className="github-panel-label"><span>Recent activity</span><small>Public events</small></div>
               {github.activities.length > 0 ? (
                 <div className="activity-list">
                   {github.activities.map((activity) => (
-                    <a href={activity.url} target="_blank" rel="noopener noreferrer" aria-label={`View ${activity.repo} on GitHub`} key={activity.id}>
+                    <a href={activity.url} target="_blank" rel="noopener noreferrer" key={activity.id}>
                       <span className="activity-dot" />
                       <span className="activity-copy">
                         <span>{activity.action}</span>
@@ -272,11 +241,11 @@ export default async function Home() {
             aria-label="Visit Nous Research — opens in a new tab"
           >
             <Image
-              src="/nous-research-art-v3.png"
+              src="/nous-research-art.webp"
               alt="Nous Research"
               width={110}
               height={112}
-              unoptimized
+              sizes="(max-width: 640px) 84px, 110px"
             />
             <span className="nous-copy">
               <small>POWERING THE HERMES ECOSYSTEM</small>
