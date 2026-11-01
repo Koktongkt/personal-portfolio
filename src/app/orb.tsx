@@ -328,6 +328,7 @@ export default function Orb({
 
     const handleMotionChange = () => {
       renderedReducedFrame = false;
+      startLoop();
     };
     reducedMotion.addEventListener("change", handleMotionChange);
 
@@ -338,7 +339,10 @@ export default function Orb({
         return;
       }
       animationFrame = requestAnimationFrame(update);
-      if (reducedMotion.matches && renderedReducedFrame) return;
+      if (reducedMotion.matches && renderedReducedFrame) {
+        stopLoop();
+        return;
+      }
       if (isPhonePointer() && time - lastRenderTime < PHONE_FRAME_MS) return;
       lastRenderTime = time;
 
@@ -353,6 +357,7 @@ export default function Orb({
       program.uniforms.rot.value = currentRotation;
       renderer.render({ scene: mesh });
       renderedReducedFrame = reducedMotion.matches;
+      if (reducedMotion.matches) stopLoop();
     };
     intersectionObserver.observe(container);
     startLoop();

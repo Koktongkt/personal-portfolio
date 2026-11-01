@@ -238,6 +238,7 @@ export default function Threads({
 
     const handleMotionChange = () => {
       renderedReducedFrame = false;
+      startLoop();
     };
     reducedMotion.addEventListener("change", handleMotionChange);
 
@@ -248,7 +249,10 @@ export default function Threads({
         return;
       }
       animationFrameId.current = requestAnimationFrame(update);
-      if (reducedMotion.matches && renderedReducedFrame) return;
+      if (reducedMotion.matches && renderedReducedFrame) {
+        stopLoop();
+        return;
+      }
       if (isPhonePointer() && time - lastRenderTime < PHONE_FRAME_MS) return;
       lastRenderTime = time;
 
@@ -271,6 +275,7 @@ export default function Threads({
       program.uniforms.iTime.value = reducedMotion.matches ? 0 : time * 0.001;
       renderer.render({ scene: mesh });
       renderedReducedFrame = reducedMotion.matches;
+      if (reducedMotion.matches) stopLoop();
     }
     startLoop();
 
