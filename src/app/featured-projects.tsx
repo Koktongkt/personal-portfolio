@@ -2,7 +2,8 @@
 import { featuredProjects } from "@/data/featured-projects";
 import { ArrowIcon, GithubIcon } from "./icons";
 
-const imageSizes = "(max-width: 640px) calc(100vw - 30px), (max-width: 900px) 50vw, 380px";
+/* 130px keeps a 3x phone on the 400w file. CSS still paints the image full width. */
+const imageSizes = "(max-width: 640px) 130px, (max-width: 900px) 50vw, 380px";
 
 export default function FeaturedProjects() {
   return (
