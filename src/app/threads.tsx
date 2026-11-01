@@ -3,7 +3,7 @@
 import { useEffect, useRef, type HTMLAttributes } from "react";
 import { Color, Mesh, Program, Renderer, Triangle } from "ogl";
 
-import { PHONE_FRAME_MS, cappedDevicePixelRatio, isPhonePointer, scheduleAfterFirstPaint } from "./webgl-runtime";
+import { PHONE_FRAME_MS, cappedDevicePixelRatio, isPhonePointer, scheduleAfterFirstPaint, threadsDetailScale } from "./webgl-runtime";
 import "./threads.css";
 
 const vertexShader = `
@@ -28,7 +28,7 @@ uniform vec2 uMouse;
 
 #define PI 3.1415926538
 
-const int u_line_count = 40;
+const int u_line_count = 20;
 const float u_line_width = 7.0;
 const float u_line_blur = 10.0;
 
@@ -176,7 +176,7 @@ export default function Threads({
 
     function resize() {
       const { clientWidth, clientHeight } = container;
-      const baseDpr = cappedDevicePixelRatio();
+      const baseDpr = cappedDevicePixelRatio() * threadsDetailScale();
       const longestSide = Math.max(clientWidth, clientHeight) * baseDpr;
       const dpr = longestSide > maxRenderDimension
         ? baseDpr * maxRenderDimension / longestSide

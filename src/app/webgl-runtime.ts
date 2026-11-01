@@ -13,6 +13,14 @@ export function isPhonePointer() {
 export const PHONE_FRAME_MS = 1000 / 30;
 
 /**
+ * The threads layer is a masked backdrop. Drawing it under 1 CSS pixel
+ * keeps a frame from becoming a long task. Phones go lower.
+ */
+export function threadsDetailScale() {
+  return isPhonePointer() ? 0.34 : 0.5;
+}
+
+/**
  * Run WebGL setup after first paint, during idle when the browser offers it.
  * The timeout still starts the canvas if the main thread never goes idle.
  */
