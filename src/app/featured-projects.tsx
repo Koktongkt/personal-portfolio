@@ -1,8 +1,9 @@
-/* eslint-disable @next/next/no-img-element -- static pre-sized WebP srcset, no optimizer round-trip */
 import { featuredProjects } from "@/data/featured-projects";
 import { ArrowIcon, GithubIcon } from "./icons";
+import ProjectPreview from "./project-preview";
 
-const imageSizes = "(max-width: 640px) calc(100vw - 30px), (max-width: 900px) 50vw, 380px";
+/* 130px keeps a 3x phone on the 400w file. CSS still paints the image full width. */
+const imageSizes = "(max-width: 640px) 130px, (max-width: 900px) 50vw, 380px";
 
 export default function FeaturedProjects() {
   return (
@@ -18,16 +19,7 @@ export default function FeaturedProjects() {
           <li key={project.slug}>
             <article className="project-card">
               <a className="project-shot" href={project.live} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true">
-                <img
-                  src={`/projects/${project.slug}.webp`}
-                  srcSet={`/projects/${project.slug}-400.webp 400w, /projects/${project.slug}.webp 800w`}
-                  sizes={imageSizes}
-                  width={800}
-                  height={500}
-                  loading="lazy"
-                  decoding="async"
-                  alt={project.alt}
-                />
+                <ProjectPreview slug={project.slug} alt={project.alt} imageSizes={imageSizes} webm800={project.webm800} />
               </a>
               <div className="project-body">
                 <h3>{project.title}</h3>
