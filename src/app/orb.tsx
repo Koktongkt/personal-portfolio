@@ -294,21 +294,50 @@ export default function Orb({
     container.addEventListener("mousemove", handleMouseMove);
     container.addEventListener("mouseleave", handleMouseLeave);
 
+    let animationFrame = 0;
+    let running = false;
+
+    const stopLoop = () => {
+      running = false;
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    };
+
+    const startLoop = () => {
+      if (running || !isVisible || document.hidden) return;
+      running = true;
+      animationFrame = requestAnimationFrame(update);
+    };
+
     const intersectionObserver = new IntersectionObserver((entries) => {
       isVisible = entries[0]?.isIntersecting ?? false;
-      if (isVisible) renderedReducedFrame = false;
+      if (isVisible) {
+        renderedReducedFrame = false;
+        startLoop();
+      } else {
+        stopLoop();
+      }
     });
-    intersectionObserver.observe(container);
+
+    const handleVisibility = () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     const handleMotionChange = () => {
       renderedReducedFrame = false;
     };
     reducedMotion.addEventListener("change", handleMotionChange);
 
-    let animationFrame = 0;
     const update = (time: number) => {
+      if (!running) return;
+      if (!isVisible || document.hidden) {
+        stopLoop();
+        return;
+      }
       animationFrame = requestAnimationFrame(update);
-      if (!isVisible || document.hidden || (reducedMotion.matches && renderedReducedFrame)) return;
+      if (reducedMotion.matches && renderedReducedFrame) return;
 
       const delta = lastTime ? (time - lastTime) * 0.001 : 0;
       lastTime = time;
@@ -322,12 +351,14 @@ export default function Orb({
       renderer.render({ scene: mesh });
       renderedReducedFrame = reducedMotion.matches;
     };
-    animationFrame = requestAnimationFrame(update);
+    intersectionObserver.observe(container);
+    startLoop();
 
     return () => {
-      cancelAnimationFrame(animationFrame);
+      stopLoop();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
       reducedMotion.removeEventListener("change", handleMotionChange);
       window.removeEventListener("resize", resize);
       container.removeEventListener("mousemove", handleMouseMove);

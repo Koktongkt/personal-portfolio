@@ -204,11 +204,36 @@ export default function Threads({
     window.addEventListener("blur", handleMouseLeave);
 
     let isVisible = true;
+    let running = false;
+
+    function stopLoop() {
+      running = false;
+      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+      animationFrameId.current = 0;
+    }
+
+    function startLoop() {
+      if (running || !isVisible || document.hidden) return;
+      running = true;
+      animationFrameId.current = requestAnimationFrame(update);
+    }
+
     const intersectionObserver = new IntersectionObserver((entries) => {
       isVisible = entries[0]?.isIntersecting ?? false;
-      if (isVisible) renderedReducedFrame = false;
+      if (isVisible) {
+        renderedReducedFrame = false;
+        startLoop();
+      } else {
+        stopLoop();
+      }
     });
     intersectionObserver.observe(container);
+
+    const handleVisibility = () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     const handleMotionChange = () => {
       renderedReducedFrame = false;
@@ -216,8 +241,13 @@ export default function Threads({
     reducedMotion.addEventListener("change", handleMotionChange);
 
     function update(time: number) {
+      if (!running) return;
+      if (!isVisible || document.hidden) {
+        stopLoop();
+        return;
+      }
       animationFrameId.current = requestAnimationFrame(update);
-      if (!isVisible || document.hidden || (reducedMotion.matches && renderedReducedFrame)) return;
+      if (reducedMotion.matches && renderedReducedFrame) return;
 
       const current = propsRef.current;
       program.uniforms.uColor.value.set(...current.color);
@@ -239,12 +269,13 @@ export default function Threads({
       renderer.render({ scene: mesh });
       renderedReducedFrame = reducedMotion.matches;
     }
-    animationFrameId.current = requestAnimationFrame(update);
+    startLoop();
 
     return () => {
-      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+      stopLoop();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
       reducedMotion.removeEventListener("change", handleMotionChange);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", handleMouseMove);
