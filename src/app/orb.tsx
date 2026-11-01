@@ -287,18 +287,19 @@ export default function Orb({
     let isVisible = true;
     const rotationSpeed = 0.3;
 
-    const handleMouseMove = (event: MouseEvent) => {
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
       const rect = container.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height);
+      const size = Math.min(rect.width, rect.height) || 1;
       const uvX = ((event.clientX - rect.left - rect.width / 2) / size) * 2;
       const uvY = ((event.clientY - rect.top - rect.height / 2) / size) * 2;
-      targetHover = Math.hypot(uvX, uvY) < 0.8 ? 1 : 0;
+      targetHover = Math.max(0, 1 - Math.hypot(uvX, uvY) / 1.8);
     };
-    const handleMouseLeave = () => {
+    const handlePointerLeave = () => {
       targetHover = 0;
     };
-    container.addEventListener("mousemove", handleMouseMove);
-    container.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("blur", handlePointerLeave);
 
     let animationFrame = 0;
     let running = false;
@@ -355,9 +356,9 @@ export default function Orb({
       lastTime = time;
       program.uniforms.iTime.value = reducedMotion.matches ? 0 : time * 0.001;
       const effectiveHover = forceHoverState ? 1 : targetHover;
-      program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.1;
-      if (!reducedMotion.matches && rotateOnHover && effectiveHover > 0.5) {
-        currentRotation += delta * rotationSpeed;
+      program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.06;
+      if (!reducedMotion.matches && rotateOnHover && effectiveHover > 0.35) {
+        currentRotation += delta * rotationSpeed * effectiveHover;
       }
       program.uniforms.rot.value = currentRotation;
       renderer.render({ scene: mesh });
@@ -374,8 +375,8 @@ export default function Orb({
       document.removeEventListener("visibilitychange", handleVisibility);
       reducedMotion.removeEventListener("change", handleMotionChange);
       window.removeEventListener("resize", resize);
-      container.removeEventListener("mousemove", handleMouseMove);
-      container.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("blur", handlePointerLeave);
       if (container.contains(gl.canvas)) container.removeChild(gl.canvas);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     };

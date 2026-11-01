@@ -63,8 +63,8 @@ float lineFn(vec2 st, float width, float perc, float offset, vec2 mouse, float t
     float amplitude_normal = smoothstep(split_point, 0.7, st.x);
     float amplitude_strength = 0.5;
     float finalAmplitude = amplitude_normal * amplitude_strength
-                           * amplitude * (1.0 + (mouse.y - 0.5) * 0.2);
-    float time_scaled = time / 10.0 + (mouse.x - 0.5) * 1.0;
+                           * amplitude * (1.0 + (mouse.y - 0.5) * 0.12);
+    float time_scaled = time / 10.0 + (mouse.x - 0.5) * 0.28;
     float blur = smoothstep(split_point, split_point + 0.05, st.x) * perc;
     float xnoise = mix(
         Perlin2D(vec2(time_scaled, st.x + perc) * 2.5),
@@ -198,6 +198,7 @@ export default function Threads({
     const currentMouse = [0.5, 0.5];
     let targetMouse = [0.5, 0.5];
     const handleMouseMove = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
       const rect = container.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
       const y = 1 - (event.clientY - rect.top) / rect.height;
@@ -267,7 +268,7 @@ export default function Threads({
       program.uniforms.uDistance.value = current.distance;
 
       if (current.enableMouseInteraction && !reducedMotion.matches) {
-        const smoothing = 0.05;
+        const smoothing = 0.035;
         currentMouse[0] += smoothing * (targetMouse[0] - currentMouse[0]);
         currentMouse[1] += smoothing * (targetMouse[1] - currentMouse[1]);
         program.uniforms.uMouse.value[0] = currentMouse[0];
