@@ -6,6 +6,8 @@ export type FeaturedProject = {
   code: string;
   tags: string[];
   alt: string;
+  /** False when the 800px WebM has not been added yet. The 400px WebM still ships. */
+  webm800?: boolean;
 };
 
 export const featuredProjects: FeaturedProject[] = [
@@ -35,5 +37,6 @@ export const featuredProjects: FeaturedProject[] = [
     code: "https://github.com/Koktongkt/tradey-desk",
     tags: ["Python", "Multi-agent", "Vercel"],
     alt: "Tradey Desk dashboard showing desk status, paper balance and position watchdog",
+    webm800: false,
   },
 ];
