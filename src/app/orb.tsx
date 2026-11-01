@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Mesh, Program, Renderer, Triangle, Vec3 } from "ogl";
 
+import { cappedDevicePixelRatio } from "./webgl-runtime";
 import "./orb.css";
 
 const vertexShader = `
@@ -260,7 +261,7 @@ export default function Orb({
     const resize = () => {
       const width = container.clientWidth;
       const height = container.clientHeight;
-      renderer.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      renderer.dpr = cappedDevicePixelRatio();
       renderer.setSize(width, height);
       program.uniforms.iResolution.value.set(
         gl.canvas.width,

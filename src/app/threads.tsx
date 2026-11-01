@@ -3,6 +3,7 @@
 import { useEffect, useRef, type HTMLAttributes } from "react";
 import { Color, Mesh, Program, Renderer, Triangle } from "ogl";
 
+import { cappedDevicePixelRatio } from "./webgl-runtime";
 import "./threads.css";
 
 const vertexShader = `
@@ -170,7 +171,7 @@ export default function Threads({
 
     function resize() {
       const { clientWidth, clientHeight } = container;
-      const baseDpr = Math.min(window.devicePixelRatio || 1, 2);
+      const baseDpr = cappedDevicePixelRatio();
       const longestSide = Math.max(clientWidth, clientHeight) * baseDpr;
       const dpr = longestSide > maxRenderDimension
         ? baseDpr * maxRenderDimension / longestSide
