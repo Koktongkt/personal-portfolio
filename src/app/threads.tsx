@@ -3,7 +3,7 @@
 import { useEffect, useRef, type HTMLAttributes } from "react";
 import { Color, Mesh, Program, Renderer, Triangle } from "ogl";
 
-import { PHONE_FRAME_MS, cappedDevicePixelRatio, isPhonePointer } from "./webgl-runtime";
+import { PHONE_FRAME_MS, cappedDevicePixelRatio, isPhonePointer, scheduleAfterFirstPaint } from "./webgl-runtime";
 import "./threads.css";
 
 const vertexShader = `
@@ -140,6 +140,11 @@ export default function Threads({
   useEffect(() => {
     const currentContainer = containerRef.current;
     if (!currentContainer) return;
+    let cleanup = () => {};
+    let cancelled = false;
+
+    const mount = () => {
+    if (cancelled) return;
     const container: HTMLDivElement = currentContainer;
 
     const renderer = new Renderer({ alpha: true });
@@ -279,7 +284,7 @@ export default function Threads({
     }
     startLoop();
 
-    return () => {
+    cleanup = () => {
       stopLoop();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
@@ -290,6 +295,14 @@ export default function Threads({
       window.removeEventListener("blur", handleMouseLeave);
       if (container.contains(gl.canvas)) container.removeChild(gl.canvas);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
+    };
+    };
+
+    const cancelSchedule = scheduleAfterFirstPaint(mount);
+    return () => {
+      cancelled = true;
+      cancelSchedule();
+      cleanup();
     };
   }, []);
 

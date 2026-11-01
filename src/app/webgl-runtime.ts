@@ -11,3 +11,23 @@ export function isPhonePointer() {
 }
 
 export const PHONE_FRAME_MS = 1000 / 30;
+
+/**
+ * Run WebGL setup after first paint, during idle when the browser offers it.
+ * The timeout still starts the canvas if the main thread never goes idle.
+ */
+export function scheduleAfterFirstPaint(work: () => void) {
+  let idleId = 0;
+  let timeoutId = 0;
+
+  if (typeof window.requestIdleCallback === "function") {
+    idleId = window.requestIdleCallback(() => work(), { timeout: 1200 });
+  } else {
+    timeoutId = window.setTimeout(work, 1);
+  }
+
+  return () => {
+    if (idleId) window.cancelIdleCallback(idleId);
+    if (timeoutId) window.clearTimeout(timeoutId);
+  };
+}
