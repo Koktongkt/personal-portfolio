@@ -3,6 +3,7 @@
 import { useEffect, useRef, type HTMLAttributes } from "react";
 import { Color, Mesh, Program, Renderer, Triangle } from "ogl";
 
+import { PHONE_FRAME_MS, cappedDevicePixelRatio, isPhonePointer, scheduleAfterFirstPaint, threadsDetailScale } from "./webgl-runtime";
 import "./threads.css";
 
 const vertexShader = `
@@ -27,7 +28,7 @@ uniform vec2 uMouse;
 
 #define PI 3.1415926538
 
-const int u_line_count = 40;
+const int u_line_count = 20;
 const float u_line_width = 7.0;
 const float u_line_blur = 10.0;
 
@@ -62,8 +63,8 @@ float lineFn(vec2 st, float width, float perc, float offset, vec2 mouse, float t
     float amplitude_normal = smoothstep(split_point, 0.7, st.x);
     float amplitude_strength = 0.5;
     float finalAmplitude = amplitude_normal * amplitude_strength
-                           * amplitude * (1.0 + (mouse.y - 0.5) * 0.2);
-    float time_scaled = time / 10.0 + (mouse.x - 0.5) * 1.0;
+                           * amplitude * (1.0 + (mouse.y - 0.5) * 0.12);
+    float time_scaled = time / 10.0 + (mouse.x - 0.5) * 0.28;
     float blur = smoothstep(split_point, split_point + 0.05, st.x) * perc;
     float xnoise = mix(
         Perlin2D(vec2(time_scaled, st.x + perc) * 2.5),
@@ -139,6 +140,11 @@ export default function Threads({
   useEffect(() => {
     const currentContainer = containerRef.current;
     if (!currentContainer) return;
+    let cleanup = () => {};
+    let cancelled = false;
+
+    const mount = () => {
+    if (cancelled) return;
     const container: HTMLDivElement = currentContainer;
 
     const renderer = new Renderer({ alpha: true });
@@ -170,7 +176,7 @@ export default function Threads({
 
     function resize() {
       const { clientWidth, clientHeight } = container;
-      const baseDpr = Math.min(window.devicePixelRatio || 1, 2);
+      const baseDpr = cappedDevicePixelRatio() * threadsDetailScale();
       const longestSide = Math.max(clientWidth, clientHeight) * baseDpr;
       const dpr = longestSide > maxRenderDimension
         ? baseDpr * maxRenderDimension / longestSide
@@ -188,9 +194,11 @@ export default function Threads({
     window.addEventListener("resize", resize);
     resize();
 
+    let lastRenderTime = 0;
     const currentMouse = [0.5, 0.5];
     let targetMouse = [0.5, 0.5];
     const handleMouseMove = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
       const rect = container.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
       const y = 1 - (event.clientY - rect.top) / rect.height;
@@ -203,20 +211,56 @@ export default function Threads({
     window.addEventListener("blur", handleMouseLeave);
 
     let isVisible = true;
+    let running = false;
+
+    function stopLoop() {
+      running = false;
+      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+      animationFrameId.current = 0;
+    }
+
+    function startLoop() {
+      if (running || !isVisible || document.hidden) return;
+      running = true;
+      animationFrameId.current = requestAnimationFrame(update);
+    }
+
     const intersectionObserver = new IntersectionObserver((entries) => {
       isVisible = entries[0]?.isIntersecting ?? false;
-      if (isVisible) renderedReducedFrame = false;
+      if (isVisible) {
+        renderedReducedFrame = false;
+        startLoop();
+      } else {
+        stopLoop();
+      }
     });
     intersectionObserver.observe(container);
 
+    const handleVisibility = () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     const handleMotionChange = () => {
       renderedReducedFrame = false;
+      startLoop();
     };
     reducedMotion.addEventListener("change", handleMotionChange);
 
     function update(time: number) {
+      if (!running) return;
+      if (!isVisible || document.hidden) {
+        stopLoop();
+        return;
+      }
       animationFrameId.current = requestAnimationFrame(update);
-      if (!isVisible || document.hidden || (reducedMotion.matches && renderedReducedFrame)) return;
+      if (reducedMotion.matches && renderedReducedFrame) {
+        stopLoop();
+        return;
+      }
+      if (isPhonePointer() && time - lastRenderTime < PHONE_FRAME_MS) return;
+      lastRenderTime = time;
 
       const current = propsRef.current;
       program.uniforms.uColor.value.set(...current.color);
@@ -224,7 +268,7 @@ export default function Threads({
       program.uniforms.uDistance.value = current.distance;
 
       if (current.enableMouseInteraction && !reducedMotion.matches) {
-        const smoothing = 0.05;
+        const smoothing = 0.035;
         currentMouse[0] += smoothing * (targetMouse[0] - currentMouse[0]);
         currentMouse[1] += smoothing * (targetMouse[1] - currentMouse[1]);
         program.uniforms.uMouse.value[0] = currentMouse[0];
@@ -237,19 +281,29 @@ export default function Threads({
       program.uniforms.iTime.value = reducedMotion.matches ? 0 : time * 0.001;
       renderer.render({ scene: mesh });
       renderedReducedFrame = reducedMotion.matches;
+      if (reducedMotion.matches) stopLoop();
     }
-    animationFrameId.current = requestAnimationFrame(update);
+    startLoop();
 
-    return () => {
-      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+    cleanup = () => {
+      stopLoop();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
       reducedMotion.removeEventListener("change", handleMotionChange);
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", handleMouseMove);
       window.removeEventListener("blur", handleMouseLeave);
       if (container.contains(gl.canvas)) container.removeChild(gl.canvas);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
+    };
+    };
+
+    const cancelSchedule = scheduleAfterFirstPaint(mount);
+    return () => {
+      cancelled = true;
+      cancelSchedule();
+      cleanup();
     };
   }, []);
 
