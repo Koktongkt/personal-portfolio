@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Mesh, Program, Renderer, Triangle, Vec3 } from "ogl";
 
-import { cappedDevicePixelRatio } from "./webgl-runtime";
+import { PHONE_FRAME_MS, cappedDevicePixelRatio, isPhonePointer } from "./webgl-runtime";
 import "./orb.css";
 
 const vertexShader = `
@@ -277,6 +277,7 @@ export default function Orb({
 
     let targetHover = 0;
     let lastTime = 0;
+    let lastRenderTime = 0;
     let currentRotation = 0;
     let isVisible = true;
     const rotationSpeed = 0.3;
@@ -338,6 +339,8 @@ export default function Orb({
       }
       animationFrame = requestAnimationFrame(update);
       if (reducedMotion.matches && renderedReducedFrame) return;
+      if (isPhonePointer() && time - lastRenderTime < PHONE_FRAME_MS) return;
+      lastRenderTime = time;
 
       const delta = lastTime ? (time - lastTime) * 0.001 : 0;
       lastTime = time;

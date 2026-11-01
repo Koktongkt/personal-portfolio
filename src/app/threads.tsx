@@ -3,7 +3,7 @@
 import { useEffect, useRef, type HTMLAttributes } from "react";
 import { Color, Mesh, Program, Renderer, Triangle } from "ogl";
 
-import { cappedDevicePixelRatio } from "./webgl-runtime";
+import { PHONE_FRAME_MS, cappedDevicePixelRatio, isPhonePointer } from "./webgl-runtime";
 import "./threads.css";
 
 const vertexShader = `
@@ -189,6 +189,7 @@ export default function Threads({
     window.addEventListener("resize", resize);
     resize();
 
+    let lastRenderTime = 0;
     const currentMouse = [0.5, 0.5];
     let targetMouse = [0.5, 0.5];
     const handleMouseMove = (event: PointerEvent) => {
@@ -248,6 +249,8 @@ export default function Threads({
       }
       animationFrameId.current = requestAnimationFrame(update);
       if (reducedMotion.matches && renderedReducedFrame) return;
+      if (isPhonePointer() && time - lastRenderTime < PHONE_FRAME_MS) return;
+      lastRenderTime = time;
 
       const current = propsRef.current;
       program.uniforms.uColor.value.set(...current.color);
