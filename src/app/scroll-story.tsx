@@ -13,6 +13,7 @@ export default function ScrollStory() {
     let frame = 0;
     let maxScroll = 0;
     let listening = false;
+    let reveals: IntersectionObserver | undefined;
 
     const measure = () => {
       maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
@@ -56,16 +57,72 @@ export default function ScrollStory() {
       bar?.style.removeProperty("transform");
     };
 
-    const onMotion = () => {
-      if (motion.matches) stopBar();
-      else startBar();
+    const clearReveals = () => {
+      reveals?.disconnect();
+      reveals = undefined;
+      document.querySelector("main")?.classList.remove("story-ready");
     };
 
-    startBar();
+    const armReveals = () => {
+      clearReveals();
+      if (motion.matches || !("IntersectionObserver" in window)) return;
+
+      const main = document.querySelector("main");
+      if (!main) return;
+      const items = Array.from(main.querySelectorAll<HTMLElement>("[data-reveal]"));
+      if (!items.length) return;
+
+      const groups = new Map<HTMLElement, HTMLElement[]>();
+      for (const el of items) {
+        const parent = el.parentElement;
+        if (!parent) continue;
+        const group = groups.get(parent);
+        if (group) group.push(el);
+        else groups.set(parent, [el]);
+      }
+      for (const group of groups.values()) {
+        group.forEach((el, index) => el.style.setProperty("--i", String(index)));
+      }
+
+      const viewportHeight = window.innerHeight;
+      for (const el of items) {
+        const rect = el.getBoundingClientRect();
+        el.classList.toggle("is-shown", rect.top < viewportHeight && rect.bottom > 0);
+      }
+
+      main.classList.add("story-ready");
+
+      reveals = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add("is-shown");
+            reveals?.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.15, rootMargin: "0px 0px -8% 0px" },
+      );
+
+      for (const el of items) {
+        if (!el.classList.contains("is-shown")) reveals.observe(el);
+      }
+    };
+
+    const nativeBar = CSS.supports("animation-timeline: scroll()");
+
+    const onMotion = () => {
+      if (motion.matches) stopBar();
+      else if (!nativeBar) startBar();
+      armReveals();
+    };
+
+    if (!nativeBar) startBar();
+    armReveals();
     motion.addEventListener("change", onMotion);
 
     return () => {
       stopBar();
+      clearReveals();
       motion.removeEventListener("change", onMotion);
     };
   }, []);
