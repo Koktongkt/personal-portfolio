@@ -294,7 +294,7 @@ export default async function Home() {
       </section>
 
       <footer className="footer section-shell">
-        <p data-reveal="">Designed and built by KT with hermes.</p>
+        <p>Designed and built by KT with hermes.</p>
       </footer>
     </main>
   );
