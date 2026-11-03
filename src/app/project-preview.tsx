@@ -7,8 +7,6 @@ type Props = {
   slug: string;
   alt: string;
   imageSizes: string;
-  /** The 800px WebM is absent for some cards. The 400px WebM is still used. */
-  webm800?: boolean;
 };
 
 const FINE = "(hover: hover) and (pointer: fine)";
@@ -19,7 +17,7 @@ function canPreview() {
   return window.matchMedia(FINE).matches && !window.matchMedia(REDUCED).matches && !saveData;
 }
 
-export default function ProjectPreview({ slug, alt, imageSizes, webm800 = true }: Props) {
+export default function ProjectPreview({ slug, alt, imageSizes }: Props) {
   const shot = useRef<HTMLSpanElement>(null);
   const video = useRef<HTMLVideoElement>(null);
 
@@ -35,7 +33,7 @@ export default function ProjectPreview({ slug, alt, imageSizes, webm800 = true }
     const attach = () => {
       if (element.getAttribute("src")) return;
       const big = box.clientWidth * window.devicePixelRatio > 480;
-      const webm = element.canPlayType('video/webm; codecs="vp9"') !== "" && (webm800 || !big);
+      const webm = element.canPlayType('video/webm; codecs="vp9"') !== "";
       const ext = webm ? "webm" : "mp4";
       const size = big ? "" : "-400";
       element.src = `/projects/clips/${slug}${size}.${ext}`;
@@ -79,7 +77,7 @@ export default function ProjectPreview({ slug, alt, imageSizes, webm800 = true }
       card.removeEventListener("focusout", onFocusOut);
       element.removeEventListener("playing", onPlaying);
     };
-  }, [slug, webm800]);
+  }, [slug]);
 
   return (
     <span className="project-media" ref={shot}>

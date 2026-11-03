@@ -19,7 +19,7 @@ export default function FeaturedProjects() {
           <li key={project.slug}>
             <article className="project-card">
               <a className="project-shot" href={project.live} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true">
-                <ProjectPreview slug={project.slug} alt={project.alt} imageSizes={imageSizes} webm800={project.webm800} />
+                <ProjectPreview slug={project.slug} alt={project.alt} imageSizes={imageSizes} />
               </a>
               <div className="project-body">
                 <h3>{project.title}</h3>
