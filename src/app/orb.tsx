@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Mesh, Program, Renderer, Triangle, Vec3 } from "ogl";
 
+import { PHONE_FRAME_MS, cappedDevicePixelRatio, isPhonePointer, scheduleAfterFirstPaint } from "./webgl-runtime";
 import "./orb.css";
 
 const vertexShader = `
@@ -233,6 +234,11 @@ export default function Orb({
   useEffect(() => {
     const currentContainer = containerRef.current;
     if (!currentContainer) return;
+    let cleanup = () => {};
+    let cancelled = false;
+
+    const mount = () => {
+    if (cancelled) return;
     const container: HTMLDivElement = currentContainer;
     const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
     const gl = renderer.gl;
@@ -260,7 +266,7 @@ export default function Orb({
     const resize = () => {
       const width = container.clientWidth;
       const height = container.clientHeight;
-      renderer.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      renderer.dpr = cappedDevicePixelRatio();
       renderer.setSize(width, height);
       program.uniforms.iResolution.value.set(
         gl.canvas.width,
@@ -276,63 +282,111 @@ export default function Orb({
 
     let targetHover = 0;
     let lastTime = 0;
+    let lastRenderTime = 0;
     let currentRotation = 0;
     let isVisible = true;
     const rotationSpeed = 0.3;
 
-    const handleMouseMove = (event: MouseEvent) => {
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
       const rect = container.getBoundingClientRect();
-      const size = Math.min(rect.width, rect.height);
+      const size = Math.min(rect.width, rect.height) || 1;
       const uvX = ((event.clientX - rect.left - rect.width / 2) / size) * 2;
       const uvY = ((event.clientY - rect.top - rect.height / 2) / size) * 2;
-      targetHover = Math.hypot(uvX, uvY) < 0.8 ? 1 : 0;
+      targetHover = Math.max(0, 1 - Math.hypot(uvX, uvY) / 1.8);
     };
-    const handleMouseLeave = () => {
+    const handlePointerLeave = () => {
       targetHover = 0;
     };
-    container.addEventListener("mousemove", handleMouseMove);
-    container.addEventListener("mouseleave", handleMouseLeave);
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("blur", handlePointerLeave);
+
+    let animationFrame = 0;
+    let running = false;
+
+    const stopLoop = () => {
+      running = false;
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    };
+
+    const startLoop = () => {
+      if (running || !isVisible || document.hidden) return;
+      running = true;
+      animationFrame = requestAnimationFrame(update);
+    };
 
     const intersectionObserver = new IntersectionObserver((entries) => {
       isVisible = entries[0]?.isIntersecting ?? false;
-      if (isVisible) renderedReducedFrame = false;
+      if (isVisible) {
+        renderedReducedFrame = false;
+        startLoop();
+      } else {
+        stopLoop();
+      }
     });
-    intersectionObserver.observe(container);
+
+    const handleVisibility = () => {
+      if (document.hidden) stopLoop();
+      else startLoop();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
 
     const handleMotionChange = () => {
       renderedReducedFrame = false;
+      startLoop();
     };
     reducedMotion.addEventListener("change", handleMotionChange);
 
-    let animationFrame = 0;
     const update = (time: number) => {
+      if (!running) return;
+      if (!isVisible || document.hidden) {
+        stopLoop();
+        return;
+      }
       animationFrame = requestAnimationFrame(update);
-      if (!isVisible || document.hidden || (reducedMotion.matches && renderedReducedFrame)) return;
+      if (reducedMotion.matches && renderedReducedFrame) {
+        stopLoop();
+        return;
+      }
+      if (isPhonePointer() && time - lastRenderTime < PHONE_FRAME_MS) return;
+      lastRenderTime = time;
 
       const delta = lastTime ? (time - lastTime) * 0.001 : 0;
       lastTime = time;
       program.uniforms.iTime.value = reducedMotion.matches ? 0 : time * 0.001;
       const effectiveHover = forceHoverState ? 1 : targetHover;
-      program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.1;
-      if (!reducedMotion.matches && rotateOnHover && effectiveHover > 0.5) {
-        currentRotation += delta * rotationSpeed;
+      program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.06;
+      if (!reducedMotion.matches && rotateOnHover && effectiveHover > 0.35) {
+        currentRotation += delta * rotationSpeed * effectiveHover;
       }
       program.uniforms.rot.value = currentRotation;
       renderer.render({ scene: mesh });
       renderedReducedFrame = reducedMotion.matches;
+      if (reducedMotion.matches) stopLoop();
     };
-    animationFrame = requestAnimationFrame(update);
+    intersectionObserver.observe(container);
+    startLoop();
 
-    return () => {
-      cancelAnimationFrame(animationFrame);
+    cleanup = () => {
+      stopLoop();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibility);
       reducedMotion.removeEventListener("change", handleMotionChange);
       window.removeEventListener("resize", resize);
-      container.removeEventListener("mousemove", handleMouseMove);
-      container.removeEventListener("mouseleave", handleMouseLeave);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("blur", handlePointerLeave);
       if (container.contains(gl.canvas)) container.removeChild(gl.canvas);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
+    };
+    };
+
+    const cancelSchedule = scheduleAfterFirstPaint(mount);
+    return () => {
+      cancelled = true;
+      cancelSchedule();
+      cleanup();
     };
   }, [hue, hoverIntensity, rotateOnHover, forceHoverState, backgroundColor]);
 
