@@ -146,8 +146,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline
 .project-card::after { content: ""; position: absolute; inset: -1px; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 10%, transparent), 0 18px 50px -20px color-mix(in srgb, var(--accent) 22%, transparent); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
 .project-card:hover, .project-card:focus-within { transform: translateY(-3px); }
 .project-card:hover::after, .project-card:focus-within::after { opacity: 1; }
-.project-shot { display: block; aspect-ratio: 16 / 10; overflow: hidden; border-bottom: 1px solid #29292d; background: #0d0d0f; }
+.project-shot { position: relative; display: block; aspect-ratio: 16 / 10; overflow: hidden; border-bottom: 1px solid #29292d; background: #0d0d0f; }
 .project-shot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.project-media { position: absolute; inset: 0; display: block; }
+.project-media img, .project-video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.project-video { position: absolute; inset: 0; opacity: 0; pointer-events: none; background: transparent; transition: opacity .2s ease; }
+.project-card.is-previewing .project-video { opacity: 1; }
 .project-body { flex: 1; display: flex; flex-direction: column; padding: 22px 22px 20px; }
 .project-body h3 { margin: 0; font-size: 22px; line-height: 1.15; letter-spacing: -.035em; font-weight: 540; }
 .project-body > p { flex: 1; margin: 10px 0 18px; color: var(--muted); font-size: 14px; line-height: 1.55; text-wrap: pretty; }
@@ -365,8 +369,12 @@ a:focus-visible, button:focus-visible { outline: 2px solid currentColor; outline
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .cursor-ambient { display: none; }
+  .project-video { display: none; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .project-card:hover, .project-card:focus-within { transform: none; }
+}
+@media not ((hover: hover) and (pointer: fine)) {
+  .project-video { display: none; }
 }
 
 @media (pointer: coarse) {
