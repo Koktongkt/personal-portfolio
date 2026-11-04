@@ -143,8 +143,8 @@ export default async function Home() {
         <div className="section-shell">
           <p className="section-number">01 / ABOUT</p>
           <div className="manifesto-grid">
-            <h2>Curious by default.<br />Practical by design.</h2>
-            <div>
+            <h2 data-reveal="">Curious by default.<br />Practical by design.</h2>
+            <div data-reveal="">
               <p>I enjoy turning fuzzy, ambitious ideas into systems people can actually use. My work moves between product engineering, AI research, and hands-on experimentation.</p>
               <p className="muted">This page is my discovery space as a problem-solver: a running log of what I’m building, what I’m learning, and the tools I’m shaping along the way.</p>
             </div>
@@ -153,14 +153,14 @@ export default async function Home() {
       </section>
 
       <section className="work section-shell" id="work">
-        <div className="section-heading">
+        <div className="section-heading" data-reveal="">
           <div><p className="section-number">02 / SELECTED WORK</p><h2>A few things worth<br />opening up.</h2></div>
           <p>Things you can open and try right now, plus a live view of what I&apos;m shipping on GitHub.</p>
         </div>
 
         <FeaturedProjects />
 
-        <div className="github-pulse">
+        <div className="github-pulse" data-reveal="">
           <div className="github-pulse-header">
             <div className="github-identity">
               <span className="github-mark"><GithubIcon /></span>
@@ -229,12 +229,13 @@ export default async function Home() {
 
       <section className="hermes-section" id="hermes">
         <div className="section-shell">
-          <div className="hermes-intro">
+          <div className="hermes-intro" data-reveal="">
             <div><p className="section-number light">03 / MY AI SYSTEM</p><h2>Not one assistant.<br />A small, focused team.</h2></div>
             <p>My Hermes setup separates orchestration, implementation, AI research, and financial analysis so each agent can stay close to the work it does best.</p>
           </div>
           <a
             className="nous-recommendation"
+            data-reveal=""
             href="https://nousresearch.com/"
             target="_blank"
             rel="noopener noreferrer"
@@ -255,7 +256,7 @@ export default async function Home() {
             <span className="nous-link">Visit Nous Research <ArrowIcon /></span>
           </a>
           <AgentSoulTeam agents={agents} />
-          <div className="workflow-line">
+          <div className="workflow-line" data-reveal="">
             <span>Idea</span><i /><span>Decompose</span><i /><span>Research + build</span><i /><span>Review</span><i /><span>Working result</span>
           </div>
         </div>
@@ -264,11 +265,11 @@ export default async function Home() {
       <section className="now section-shell">
         <p className="section-number">04 / NOW</p>
         <div className="now-grid">
-          <h2>Currently<br />in motion.</h2>
+          <h2 data-reveal="">Currently<br />in motion.</h2>
           <div className="now-list">
-            <div><span>01</span><p>Building agentic portfolio management</p></div>
-            <div><span>02</span><p>Exploring durable multi-agent workflows</p></div>
-            <div><span>03</span><p>Improving how AI systems collaborate with people</p></div>
+            <div data-reveal=""><span>01</span><p>Building agentic portfolio management</p></div>
+            <div data-reveal=""><span>02</span><p>Exploring durable multi-agent workflows</p></div>
+            <div data-reveal=""><span>03</span><p>Improving how AI systems collaborate with people</p></div>
           </div>
         </div>
       </section>
@@ -276,10 +277,10 @@ export default async function Home() {
       <section className="contact" id="contact">
         <div className="section-shell contact-inner">
           <p className="section-number light">05 / CONTACT</p>
-          <h2>Have an interesting<br />problem?</h2>
-          <p>I&apos;m always interested in thoughtful software, AI experiments, and ambitious technical ideas to solve real world problems.</p>
-          <a className="contact-link" href="mailto:tan1995_@hotmail.com">Start a conversation <ArrowIcon /></a>
-          <div className="contact-details">
+          <h2 data-reveal="">Have an interesting<br />problem?</h2>
+          <p data-reveal="">I&apos;m always interested in thoughtful software, AI experiments, and ambitious technical ideas to solve real world problems.</p>
+          <a className="contact-link" data-reveal="" href="mailto:tan1995_@hotmail.com">Start a conversation <ArrowIcon /></a>
+          <div className="contact-details" data-reveal="">
             <a className="contact-phone" href="tel:+6581610164">
               <strong>+65 81610164</strong>
             </a>

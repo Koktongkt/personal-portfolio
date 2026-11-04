@@ -16,7 +16,7 @@ export default function FeaturedProjects() {
       </div>
       <ul className="featured-grid">
         {featuredProjects.map((project) => (
-          <li key={project.slug}>
+          <li key={project.slug} data-reveal="">
             <article className="project-card">
               <a className="project-shot" href={project.live} target="_blank" rel="noopener noreferrer" tabIndex={-1} aria-hidden="true">
                 <ProjectPreview slug={project.slug} alt={project.alt} imageSizes={imageSizes} />

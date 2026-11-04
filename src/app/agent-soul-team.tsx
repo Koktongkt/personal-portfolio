@@ -128,7 +128,7 @@ export default function AgentSoulTeam({ agents }: AgentSoulTeamProps) {
 
   return (
     <>
-      <div className="agent-topology">
+      <div className="agent-topology" data-reveal="">
         {agents.map((agent, index) => (
           <article className={`agent-card agent-${index}`} key={agent.name}>
             <div className="agent-card-top"><span>0{index + 1}</span><i /></div>
