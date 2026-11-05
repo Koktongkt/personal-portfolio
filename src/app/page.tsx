@@ -94,8 +94,8 @@ export default async function Home() {
         />
         <div className="hero-copy">
           <p className="eyebrow"><span className="status-dot" /> Building at the edge of reality, software and AI</p>
-          <h1>I build systems that make ambitious ideas <em>real.</em></h1>
-          <p className="hero-lede">Developer, builder, and AI experimenter working across applications, large language models, vision models, and agentic workflows.</p>
+          <h1 data-cursor="text">I build systems that make ambitious ideas <em>real.</em></h1>
+          <p className="hero-lede" data-cursor="text">Developer, builder, and AI experimenter working across applications, large language models, vision models, and agentic workflows.</p>
           <div className="hero-actions">
             <a className="button button-primary" href="#work">Explore my work <ArrowIcon /></a>
             <a className="button button-secondary" href="#hermes">Meet my hermes agents</a>
