@@ -5,7 +5,10 @@ import "./custom-cursor.css";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 const RING_SIZE = 40;
-const TRAIL_MS = 64;
+/* First-order follow. A gap of G px is within 1px after tau * ln(G) ms, so a
+   fast stop (~80px of lag) settles in about 70ms and a long jump in about 110ms.
+   No velocity term, so the ring cannot overshoot. */
+const SETTLE_TAU_MS = 16;
 
 type Mode = "hidden" | "default" | "link" | "text" | "view" | "play" | "native";
 
@@ -154,7 +157,7 @@ export default function CustomCursor() {
       frame = 0;
       const dt = lastTime ? Math.min(48, now - lastTime) : 16;
       lastTime = now;
-      const factor = reduced ? 1 : 1 - Math.exp(-dt / TRAIL_MS);
+      const factor = reduced ? 1 : 1 - Math.exp(-dt / SETTLE_TAU_MS);
 
       if (boxDirty && magnet) {
         boxDirty = false;
