@@ -5,7 +5,10 @@ import "./custom-cursor.css";
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
 const RING_SIZE = 40;
-const TRAIL_MS = 64;
+/* First-order follow. A gap of G px is within 1px after tau * ln(G) ms, so a
+   fast stop (~80px of lag) settles in about 70ms and a long jump in about 110ms.
+   No velocity term, so the ring cannot overshoot. */
+const SETTLE_TAU_MS = 16;
 
 type Mode = "hidden" | "default" | "link" | "text" | "view" | "play" | "native";
 
@@ -154,7 +157,7 @@ export default function CustomCursor() {
       frame = 0;
       const dt = lastTime ? Math.min(48, now - lastTime) : 16;
       lastTime = now;
-      const factor = reduced ? 1 : 1 - Math.exp(-dt / TRAIL_MS);
+      const factor = reduced ? 1 : 1 - Math.exp(-dt / SETTLE_TAU_MS);
 
       if (boxDirty && magnet) {
         boxDirty = false;
@@ -312,9 +315,9 @@ export default function CustomCursor() {
       </span>
       <span className="fx-cursor__pill">View →</span>
       <span className="fx-cursor__play">
-        <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
-          <circle cx="22" cy="22" r="22" fill="#c7ff4a" />
-          <path d="M18.2 14.4v15.2L31.4 22 18.2 14.4Z" fill="#10110d" />
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">
+          <circle cx="23" cy="23" r="19.25" fill="#c7ff4a" stroke="#10110d" strokeWidth="3.5" />
+          <path d="M19.4 15.4v15.2l13-7.6-13-7.6Z" fill="#10110d" />
         </svg>
       </span>
     </div>

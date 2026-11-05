@@ -35,7 +35,8 @@
   height: 8px;
   border-radius: 50%;
   background: #c7ff4a;
-  box-shadow: 0 0 10px color-mix(in srgb, #c7ff4a 65%, transparent);
+  /* Dark hairline keeps the lime dot readable on white screenshots and the light agent cards. */
+  box-shadow: 0 0 0 1.5px #10110d;
 }
 
 .fx-cursor__ring {
@@ -44,7 +45,8 @@
   box-sizing: border-box;
   border: 1.5px solid #c7ff4a;
   border-radius: 50%;
-  background: color-mix(in srgb, #c7ff4a 8%, transparent);
+  background: transparent;
+  box-shadow: 0 0 0 1.5px #10110d, inset 0 0 0 1.5px #10110d;
 }
 
 .fx-cursor__beam svg,
@@ -63,6 +65,7 @@
   letter-spacing: -0.01em;
   line-height: 1;
   white-space: nowrap;
+  box-shadow: 0 0 0 1.5px #10110d;
 }
 
 
