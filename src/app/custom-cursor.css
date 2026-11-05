@@ -1,0 +1,73 @@
+.fx-cursor,
+.fx-cursor * { pointer-events: none; }
+
+.fx-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.fx-cursor.is-on { opacity: 1; }
+
+.fx-cursor span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+.fx-cursor[data-mode="default"] .fx-cursor__dot,
+.fx-cursor[data-mode="default"] .fx-cursor__ring,
+.fx-cursor[data-mode="link"] .fx-cursor__dot,
+.fx-cursor[data-mode="link"] .fx-cursor__ring,
+.fx-cursor[data-mode="text"] .fx-cursor__beam,
+.fx-cursor[data-mode="view"] .fx-cursor__pill,
+.fx-cursor[data-mode="play"] .fx-cursor__play { opacity: 1; }
+
+.fx-cursor__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c7ff4a;
+  box-shadow: 0 0 10px color-mix(in srgb, #c7ff4a 65%, transparent);
+}
+
+.fx-cursor__ring {
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 1.5px solid #c7ff4a;
+  border-radius: 50%;
+  background: color-mix(in srgb, #c7ff4a 8%, transparent);
+}
+
+.fx-cursor__beam svg,
+.fx-cursor__play svg { display: block; }
+
+.fx-cursor .fx-cursor__pill {
+  height: 32px;
+  padding: 0 12px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #c7ff4a;
+  color: #10110d;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+
+html.has-custom-cursor,
+html.has-custom-cursor * { cursor: none !important; }
+
+html.has-custom-cursor :is(input, textarea, select, option, [contenteditable="true"]),
+html.has-custom-cursor :is(input, textarea, select, option, [contenteditable="true"]) * { cursor: auto !important; }

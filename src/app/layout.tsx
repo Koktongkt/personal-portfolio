@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import CursorAmbient from "./cursor-ambient";
+import CursorGate from "./cursor-gate";
 import ScrollStory from "./scroll-story";
 import "./globals.css";
 
@@ -46,7 +46,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <ScrollStory />
-        <CursorAmbient />
+        <CursorGate />
         {children}
       </body>
     </html>
