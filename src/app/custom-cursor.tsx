@@ -315,9 +315,9 @@ export default function CustomCursor() {
       </span>
       <span className="fx-cursor__pill">View →</span>
       <span className="fx-cursor__play">
-        <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
-          <circle cx="22" cy="22" r="22" fill="#c7ff4a" />
-          <path d="M18.2 14.4v15.2L31.4 22 18.2 14.4Z" fill="#10110d" />
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">
+          <circle cx="23" cy="23" r="19.25" fill="#c7ff4a" stroke="#10110d" strokeWidth="3.5" />
+          <path d="M19.4 15.4v15.2l13-7.6-13-7.6Z" fill="#10110d" />
         </svg>
       </span>
     </div>
