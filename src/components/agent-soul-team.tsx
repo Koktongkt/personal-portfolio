@@ -96,6 +96,7 @@ export default function AgentSoulTeam({ agents }: AgentSoulTeamProps) {
   const [activeAgent, setActiveAgent] = useState<Agent | null>(null);
   const titleId = useId();
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -107,10 +108,13 @@ export default function AgentSoulTeam({ agents }: AgentSoulTeamProps) {
 
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setActiveAgent(null);
-      if (event.key === "Tab") {
-        event.preventDefault();
-        closeButtonRef.current?.focus();
-      }
+      if (event.key !== "Tab") return;
+      // Keep focus inside the dialog, cycling between its focusable parts.
+      const stops = [closeButtonRef.current, scrollRef.current].filter((el): el is HTMLButtonElement | HTMLDivElement => el !== null);
+      const at = stops.indexOf(document.activeElement as HTMLButtonElement | HTMLDivElement);
+      const next = stops[(at + (event.shiftKey ? -1 : 1) + stops.length) % stops.length];
+      event.preventDefault();
+      next?.focus();
     };
     window.addEventListener("keydown", closeOnEscape);
 
@@ -137,7 +141,7 @@ export default function AgentSoulTeam({ agents }: AgentSoulTeamProps) {
             <p>{agent.description}</p>
             <div className="agent-card-footer">
               <span className="agent-tools">{agent.tools}</span>
-              <button className="soul-link" type="button" onClick={() => openSoul(agent)}>
+              <button className="soul-link" type="button" aria-haspopup="dialog" aria-label={`Read the SOUL.md for ${agent.name}`} onClick={() => openSoul(agent)}>
                 SOUL.md
               </button>
             </div>
@@ -177,7 +181,7 @@ export default function AgentSoulTeam({ agents }: AgentSoulTeamProps) {
                 <span aria-hidden="true">×</span>
               </button>
             </header>
-            <div className="soul-modal-scroll">
+            <div className="soul-modal-scroll" ref={scrollRef} tabIndex={0} role="region" aria-label={`${activeAgent.name} SOUL.md contents`}>
               <SoulDocument content={soulDocuments[activeAgent.name]} />
             </div>
           </section>
