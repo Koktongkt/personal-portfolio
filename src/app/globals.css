@@ -450,14 +450,21 @@ main.story-ready [data-reveal].is-shown {
 .hermes-intro { display: grid; grid-template-columns: 1.3fr .7fr; gap: 90px; align-items: end; }
 .hermes-intro h2, .contact h2 { font-size: clamp(44px, 6vw, 80px); line-height: .98; letter-spacing: -.062em; font-weight: 570; text-wrap: balance; }
 .hermes-intro > p { max-width: 460px; color: #5d5d58; font-size: 17px; line-height: 1.7; }
-.agent-topology { position: relative; margin-top: 76px; min-height: 525px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: 195px minmax(250px, auto); gap: 80px 24px; }
+.agent-topology {
+  /* The connector drawing fills the gap between the two rows, so the rows can grow with their content. */
+  --row-gap: 80px;
+  position: relative; margin-top: 76px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto minmax(250px, auto); gap: var(--row-gap) 24px;
+}
 .agent-card {
   position: relative; z-index: 2; padding: 24px 26px; display: flex; flex-direction: column; border: 1px solid #d3d1c8; border-radius: var(--r-lg);
   background: linear-gradient(180deg, #fbfaf5, #f1efe7); box-shadow: inset 0 1px 0 #fff, 0 20px 46px -22px rgba(30, 30, 26, .28);
   transition: transform .4s var(--ease), box-shadow .4s var(--ease), border-color .3s ease;
 }
 .agent-card:hover { transform: translateY(-4px); border-color: #b9c79a; box-shadow: inset 0 1px 0 #fff, 0 30px 60px -24px rgba(60, 80, 20, .32); }
-.agent-0 { width: 36%; justify-self: center; grid-column: 1 / 4; }
+/* Rows are placed by hand so the connector drawing can share row 1 with the orchestrator. */
+.agent-card { grid-row: 2; }
+.agent-0 { width: 36%; min-height: 230px; justify-self: center; grid-column: 1 / 4; grid-row: 1; }
 .agent-card-top { display: flex; align-items: center; justify-content: space-between; color: #85847e; font: 13px var(--font-pixel); }
 .agent-card-top i { width: 8px; height: 8px; border-radius: 50%; background: #6f9f1f; box-shadow: 0 0 0 4px rgba(111, 159, 31, .16); }
 .agent-command { margin: 26px 0 8px; color: var(--moss); font: 13px var(--font-mono); }
@@ -470,7 +477,7 @@ main.story-ready [data-reveal].is-shown {
   font: 12px var(--font-mono); letter-spacing: .04em; transition: color .2s ease, border-color .2s ease, background .2s ease;
 }
 .soul-link:hover { color: #f4f6ea; border-color: var(--moss); background: var(--moss); }
-.connection-lines { position: absolute; inset: 0; z-index: 1; width: 100%; height: 390px; overflow: visible; }
+.connection-lines { grid-column: 1 / -1; grid-row: 1; align-self: end; z-index: 1; width: 100%; height: var(--row-gap); margin-bottom: calc(var(--row-gap) * -1); overflow: visible; }
 .connection-lines path { fill: none; stroke: #9d9b91; stroke-width: 1; stroke-dasharray: 3 5; animation: flow 1.6s linear infinite; }
 @keyframes flow { to { stroke-dashoffset: -16; } }
 .workflow-line { margin-top: 48px; padding-top: 30px; border-top: 1px solid #cfcdc4; display: flex; align-items: center; color: #5f5e58; font: 12px var(--font-mono); text-transform: uppercase; letter-spacing: .1em; }
@@ -620,7 +627,7 @@ main.story-ready [data-reveal].is-shown {
   .is-lead .project-card { flex-direction: column; }
   .is-lead .project-shot { flex: none; border-right: 0; border-bottom: 1px solid var(--hair); border-radius: calc(var(--r-lg) - 1px) calc(var(--r-lg) - 1px) 0 0; }
   .is-lead .project-actions { max-width: none; }
-  .agent-topology { gap: 70px 16px; }
+  .agent-topology { --row-gap: 70px; column-gap: 16px; }
   .agent-0 { width: 54%; }
   .agent-card { padding: 20px; }
   .agent-card:not(.agent-0) .agent-card-footer { flex-direction: column; align-items: flex-start; gap: 12px; }
@@ -666,8 +673,9 @@ main.story-ready [data-reveal].is-shown {
   .activity-list time { grid-column: 2; grid-row: 2; }
   .activity-list a > svg { grid-column: 3; grid-row: 1; }
   .hermes-section { border-radius: var(--r-lg) var(--r-lg) 0 0; }
-  .agent-topology { grid-template-columns: 1fr; grid-template-rows: none; gap: 12px; min-height: 0; margin-top: 56px; }
-  .agent-0 { width: 100%; grid-column: auto; }
+  .agent-topology { grid-template-columns: 1fr; grid-template-rows: none; gap: 12px; margin-top: 56px; }
+  .agent-card, .agent-0 { grid-row: auto; }
+  .agent-0 { width: 100%; min-height: 200px; grid-column: auto; }
   .agent-card { min-height: 200px; padding: 22px; }
   .agent-card:not(.agent-0) .agent-card-footer { flex-direction: row; align-items: center; }
   .connection-lines { display: none; }

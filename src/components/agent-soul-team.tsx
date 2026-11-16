@@ -147,8 +147,8 @@ export default function AgentSoulTeam({ agents }: AgentSoulTeamProps) {
             </div>
           </article>
         ))}
-        <svg className="connection-lines" viewBox="0 0 900 390" preserveAspectRatio="none" aria-hidden="true">
-          <path d="M450 130V190M450 190H145V245M450 190V245M450 190H755V245" />
+        <svg className="connection-lines" viewBox="0 0 900 80" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M450 0V40M450 40H150V80M450 40V80M450 40H750V80" vectorEffect="non-scaling-stroke" />
         </svg>
       </div>
 
