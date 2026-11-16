@@ -1,53 +1,66 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import CursorGate from "./cursor-gate";
-import ScrollStory from "./scroll-story";
+import type { Metadata, Viewport } from "next";
+import { GeistMono } from "geist/font/mono";
+import { GeistPixelSquare } from "geist/font/pixel/square";
+import { GeistSans } from "geist/font/sans";
+import CursorGate from "@/components/cursor-gate";
+import ScrollStory from "@/components/scroll-story";
+import Spotlight from "@/components/spotlight";
+import { site, socials } from "@/data/site";
 import "./globals.css";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
-
-const siteUrl = "https://portfolio-lilac-beta-40.vercel.app";
-const siteTitle = "Tan — Developer & AI Builder";
-const siteDescription = "Personal portfolio exploring software, physical vision, and multi-agent AI systems.";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: siteTitle,
-  description: siteDescription,
+  metadataBase: new URL(site.url),
+  title: site.title,
+  description: site.description,
+  alternates: { canonical: "/" },
   openGraph: {
-    title: siteTitle,
-    description: siteDescription,
-    url: siteUrl,
-    siteName: siteTitle,
+    title: site.title,
+    description: site.description,
+    url: site.url,
+    siteName: site.title,
     type: "website",
-    images: [
-      {
-        url: `${siteUrl}/og.png`,
-        width: 1200,
-        height: 630,
-        alt: siteTitle,
-      },
-    ],
+    locale: "en",
+    images: [{ url: `${site.url}/og.png`, width: 1200, height: 630, alt: site.title }],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteTitle,
-    description: siteDescription,
-    images: [`${siteUrl}/og.png`],
+    title: site.title,
+    description: site.description,
+    images: [`${site.url}/og.png`],
   },
   icons: {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0a0a0b",
+  colorScheme: "dark",
+};
+
+/* Only what the page itself states: the name it uses, the URL, and the linked profiles. */
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "KT",
+  alternateName: "Tan",
+  url: site.url,
+  description: site.description,
+  sameAs: socials.map((social) => social.href),
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${GeistPixelSquare.variable}`}>
       <body>
         <ScrollStory />
         <CursorGate />
+        <Spotlight />
         {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+        />
       </body>
     </html>
   );

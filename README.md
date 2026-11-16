@@ -1,6 +1,6 @@
 # KT — Personal Portfolio
 
-A responsive personal portfolio built with Next.js 16, React 19, and TypeScript. It includes a live GitHub activity dashboard, contribution graph, pinned repositories, an interactive cursor ambience, and responsive sections for selected work, the Hermes agent system, current focus, and contact details.
+A responsive personal portfolio built with Next.js 16, React 19, and TypeScript. It includes a live GitHub activity dashboard, contribution graph, pinned repositories, an interactive cursor ambience, and responsive sections for focus areas, selected work, the Hermes agent system, current focus, and contact details.
 
 ## Run locally
 
@@ -56,9 +56,19 @@ Never commit a real token. `.env.example` documents the supported variable, whil
 ## Project structure
 
 ```text
-src/app/page.tsx             Main portfolio page
-src/app/globals.css          Responsive visual system
-src/app/cursor-ambient.tsx   Pointer-following background effect
-src/lib/github.ts            Server-side GitHub data integration
-public/                      Static assets
+src/app/page.tsx              Page composition (sections in reading order)
+src/app/layout.tsx            Fonts, metadata, JSON-LD, global client helpers
+src/app/globals.css           Design tokens and the full visual system
+src/app/robots.ts, sitemap.ts Crawler metadata
+src/components/               Section and UI components (header, terminal, projects, GitHub panel, agents, cursor, WebGL)
+src/data/site.ts              Nav, socials, agents, focus areas, contact details
+src/data/featured-projects.ts Featured project content
+src/lib/github.ts             Server-side GitHub data integration
+public/                       Static assets
 ```
+
+## Design notes
+
+- Fonts are Geist Sans, Geist Mono and Geist Pixel, self-hosted through the `geist` package, so builds never depend on a font CDN.
+- Colour, radius, spacing and easing tokens live at the top of `globals.css`.
+- Motion respects `prefers-reduced-motion`; the hero terminal sequence is CSS-only and renders complete without JavaScript.

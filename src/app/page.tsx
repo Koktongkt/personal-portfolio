@@ -1,301 +1,158 @@
 import Image from "next/image";
+import AgentSoulTeam from "@/components/agent-soul-team";
+import CopyEmail from "@/components/copy-email";
+import FeaturedProjects from "@/components/featured-projects";
+import FocusAreas from "@/components/focus-areas";
+import GithubPulse from "@/components/github-pulse";
+import HeroTerminal from "@/components/hero-terminal";
+import { ArrowIcon, ArrowUpRightIcon } from "@/components/icons";
+import Orb from "@/components/orb";
+import SiteFooter from "@/components/site-footer";
+import SiteHeader from "@/components/site-header";
+import SocialLinks from "@/components/social-links";
+import Threads from "@/components/threads";
+import { agents, nowItems, site, workflowSteps } from "@/data/site";
 import { getGithubSnapshot } from "@/lib/github";
-import AgentSoulTeam from "./agent-soul-team";
-import FeaturedProjects from "./featured-projects";
-import { ArrowIcon, GithubIcon } from "./icons";
-import Orb from "./orb";
-import Threads from "./threads";
 
 export const revalidate = 3600;
-
-const agents = [
-  {
-    name: "default",
-    role: "Orchestrator",
-    description: "Decomposes objectives and coordinates the system.",
-    tools: "plan · route · review",
-  },
-  {
-    name: "cody",
-    role: "Software engineer",
-    description: "Implements, tests, and ships full-stack work.",
-    tools: "code · test · ship",
-  },
-  {
-    name: "aivory",
-    role: "AI researcher",
-    description: "Investigates models, vision systems, and approaches.",
-    tools: "search · compare · synthesize",
-  },
-  {
-    name: "alpha_sage",
-    role: "Financial, quant & macro analyst",
-    description: "Evaluates opportunities through evidence, scenarios, and disciplined risk analysis.",
-    tools: "fundamentals · macro · risk",
-  },
-] as const;
-
-function XIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-      <path d="M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.66l-5.21-6.82-5.97 6.82H1.67l7.73-8.84L1.25 2.25h6.83l4.71 6.23 5.45-6.23Zm-1.16 17.52h1.83L7.08 4.13H5.11l11.97 15.64Z" />
-    </svg>
-  );
-}
-
-function LinkedinIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
-      <path d="M6.5 8.25H3.25V18.7H6.5V8.25ZM4.88 3.05A1.89 1.89 0 1 0 4.88 6.83 1.89 1.89 0 0 0 4.88 3.05ZM18.7 12.7c0-3.15-1.68-4.62-3.93-4.62-1.81 0-2.62 1-3.07 1.7V8.25H8.45V18.7h3.25v-5.17c0-1.36.26-2.68 1.95-2.68 1.67 0 1.69 1.56 1.69 2.77v5.08h3.25l.11-6Z" />
-    </svg>
-  );
-}
-
-function formatGithubDate(date: string) {
-  return new Intl.DateTimeFormat("en", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(date));
-}
 
 export default async function Home() {
   const github = await getGithubSnapshot();
 
   return (
-    <main>
-      <header className="site-header">
-        <div className="brand-cluster">
-          <a className="wordmark" href="#top" aria-label="KT home">KT<span>.</span></a>
-          <span className="brand-divider" aria-hidden="true" />
-          <div className="social-links" aria-label="Social profiles">
-            <a href="https://github.com/Koktongkt" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile"><GithubIcon /></a>
-            <a href="https://x.com/KT2596612580139" target="_blank" rel="noopener noreferrer" aria-label="X profile"><XIcon /></a>
-            <a href="https://www.linkedin.com/in/kok-tong-tan-01b219159/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile"><LinkedinIcon /></a>
-          </div>
-        </div>
-        <nav aria-label="Main navigation">
-          <a href="#work">Work</a>
-          <a href="#hermes">Hermes</a>
-          <a href="#about">About</a>
-        </nav>
-        <a className="header-cta" href="#contact">Let&apos;s talk <ArrowIcon /></a>
-      </header>
+    <>
+      <a className="skip-link" href="#content">Skip to content</a>
+      <SiteHeader />
 
-      <section className="hero section-shell" id="top">
-        <Threads
-          className="threads-backdrop"
-          color={[1, 1, 1]}
-          amplitude={1.5}
-          distance={0.3}
-          enableMouseInteraction
-          aria-hidden="true"
-        />
-        <div className="hero-copy">
-          <p className="eyebrow"><span className="status-dot" /> Building at the edge of reality, software and AI</p>
-          <h1 data-cursor="text">I build systems that make ambitious ideas <em>real.</em></h1>
-          <p className="hero-lede" data-cursor="text">Developer, builder, and AI experimenter working across applications, large language models, vision models, and agentic workflows.</p>
-          <div className="hero-actions">
-            <a className="button button-primary" href="#work">Explore my work <ArrowIcon /></a>
-            <a className="button button-secondary" href="#hermes">Meet my hermes agents</a>
-          </div>
-        </div>
-
-        <div className="terminal-wrap" aria-label="Hermes agent status preview">
-          <div className="terminal-glow" />
-          <div className="terminal">
-            <div className="terminal-bar">
-              <div className="window-dots"><i /><i /><i /></div>
-              <span>KT / command-center</span>
-              <span className="terminal-live">LIVE</span>
-            </div>
-            <div className="terminal-body">
-              <p><span className="prompt">$</span> hermes agents status</p>
-              <div className="agent-status-list">
-                {agents.map((agent) => (
-                  <div className="agent-status" key={agent.name}>
-                    <span className="online-dot" />
-                    <strong>{agent.name}</strong>
-                    <span>{agent.role}</span>
-                    <small>online</small>
-                  </div>
-                ))}
-              </div>
-              <div className="terminal-divider" />
-              <p className="cursor-line"><span className="prompt">$</span> <i /></p>
-            </div>
-          </div>
-          <p className="terminal-caption">A personal AI team designed around how I work.</p>
-        </div>
-      </section>
-
-      <section className="manifesto" id="about">
-        <div className="about-orb" aria-hidden="true">
-          <Orb
-            hue={50}
-            hoverIntensity={0.5}
-            rotateOnHover
-            forceHoverState={false}
-            backgroundColor="#0a0a0b"
+      <main id="content">
+        <section className="hero" id="top">
+          <Threads
+            className="threads-backdrop"
+            color={[1, 1, 1]}
+            amplitude={1.5}
+            distance={0.3}
+            enableMouseInteraction
+            aria-hidden="true"
           />
-        </div>
-        <div className="section-shell">
-          <p className="section-number">01 / ABOUT</p>
-          <div className="manifesto-grid">
-            <h2 data-reveal="">Curious by default.<br />Practical by design.</h2>
-            <div data-reveal="">
-              <p>I enjoy turning fuzzy, ambitious ideas into systems people can actually use. My work moves between product engineering, AI research, and hands-on experimentation.</p>
-              <p className="muted">This page is my discovery space as a problem-solver: a running log of what I’m building, what I’m learning, and the tools I’m shaping along the way.</p>
+          <div className="hero-inner section-shell">
+            <div className="hero-copy">
+              <p className="eyebrow"><span className="status-dot" /> Building at the edge of reality, software and AI</p>
+              <h1 data-cursor="text">I build systems that make ambitious ideas <em>real.</em></h1>
+              <p className="hero-lede" data-cursor="text">Developer, builder, and AI experimenter working across applications, large language models, vision models, and agentic workflows.</p>
+              <div className="hero-actions">
+                <a className="button button-primary" href="#work">Explore my work <ArrowIcon /></a>
+                <a className="button button-secondary" href="#hermes">Meet my hermes agents</a>
+              </div>
             </div>
+            <HeroTerminal />
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="work section-shell" id="work">
-        <div className="section-heading" data-reveal="">
-          <div><p className="section-number">02 / SELECTED WORK</p><h2>A few things worth<br />opening up.</h2></div>
-          <p>Things you can open and try right now, plus a live view of what I&apos;m shipping on GitHub.</p>
-        </div>
+        <section className="manifesto" id="about">
+          <div className="about-orb" aria-hidden="true">
+            <Orb hue={50} hoverIntensity={0.5} rotateOnHover forceHoverState={false} backgroundColor="#0a0a0b" />
+          </div>
+          <div className="section-shell">
+            <p className="section-number"><span>01</span>About</p>
+            <div className="manifesto-grid">
+              <h2 data-reveal="">Curious by default.<br />Practical by design.</h2>
+              <div className="manifesto-copy" data-reveal="">
+                <p>I enjoy turning fuzzy, ambitious ideas into systems people can actually use. My work moves between product engineering, AI research, and hands-on experimentation.</p>
+                <p className="muted">This page is my discovery space as a problem-solver: a running log of what I’m building, what I’m learning, and the tools I’m shaping along the way.</p>
+              </div>
+            </div>
+            <FocusAreas />
+          </div>
+        </section>
 
-        <FeaturedProjects />
-
-        <div className="github-pulse" data-reveal="">
-          <div className="github-pulse-header">
-            <div className="github-identity">
-              <span className="github-mark"><GithubIcon /></span>
+        <section className="work" id="work">
+          <div className="section-shell">
+            <div className="section-heading" data-reveal="">
               <div>
-                <p>Live from GitHub</p>
-                <a href={github.profileUrl} target="_blank" rel="noopener noreferrer">
-                  @{github.username} <ArrowIcon />
-                </a>
+                <p className="section-number"><span>02</span>Selected work</p>
+                <h2>A few things worth<br />opening up.</h2>
               </div>
+              <p>Things you can open and try right now, plus a live view of what I&apos;m shipping on GitHub.</p>
             </div>
-            <div className="github-stats" aria-label="GitHub profile statistics">
-              <div><strong>{github.contributionTotal}</strong><span>contributions / year</span></div>
-              <div><strong>{github.publicRepos}</strong><span>public repositories</span></div>
-            </div>
+            <FeaturedProjects />
+            <GithubPulse github={github} />
           </div>
+        </section>
 
-          <div className="contribution-panel">
-            <div className="github-panel-label">
-              <span>Contribution activity</span>
-              <small>Past 12 months</small>
-            </div>
-            {github.contributions.length > 0 ? (
-              <div className="contribution-scroll" role="img" aria-label={`${github.contributionTotal} GitHub contributions in the past year`}>
-                <div className="contribution-grid">
-                  {github.contributions.slice(-371).map((day) => (
-                    <span
-                      className={`contribution-cell level-${day.level}`}
-                      key={day.date}
-                      title={`${day.count} contribution${day.count === 1 ? "" : "s"} on ${formatGithubDate(day.date)}`}
-                    />
-                  ))}
-                </div>
+        <section className="hermes-section" id="hermes">
+          <div className="section-shell">
+            <div className="hermes-intro" data-reveal="">
+              <div>
+                <p className="section-number light"><span>03</span>My AI system</p>
+                <h2>Not one assistant.<br />A small, focused team.</h2>
               </div>
-            ) : (
-              <p className="github-empty">Contribution data is temporarily unavailable. View the live graph on GitHub.</p>
-            )}
-            <div className="contribution-legend" aria-hidden="true">
-              <span>Less</span><i className="level-0" /><i className="level-1" /><i className="level-2" /><i className="level-3" /><i className="level-4" /><span>More</span>
+              <p>My Hermes setup separates orchestration, implementation, AI research, and financial analysis so each agent can stay close to the work it does best.</p>
             </div>
-          </div>
-
-          <div className="github-content-grid">
-            <div className="activity-panel">
-              <div className="github-panel-label"><span>Recent activity</span><small>Public events</small></div>
-              {github.activities.length > 0 ? (
-                <div className="activity-list">
-                  {github.activities.map((activity) => (
-                    <a href={activity.url} target="_blank" rel="noopener noreferrer" key={activity.id}>
-                      <span className="activity-dot" />
-                      <span className="activity-copy">
-                        <span>{activity.action}</span>
-                        <strong>{activity.repo}</strong>
-                        <small>{formatGithubDate(activity.date)}</small>
-                      </span>
-                      <ArrowIcon />
-                    </a>
-                  ))}
-                </div>
-              ) : (
-                <p className="github-empty">Recent public activity will appear here automatically.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="hermes-section" id="hermes">
-        <div className="section-shell">
-          <div className="hermes-intro" data-reveal="">
-            <div><p className="section-number light">03 / MY AI SYSTEM</p><h2>Not one assistant.<br />A small, focused team.</h2></div>
-            <p>My Hermes setup separates orchestration, implementation, AI research, and financial analysis so each agent can stay close to the work it does best.</p>
-          </div>
-          <a
-            className="nous-recommendation"
-            data-reveal=""
-            href="https://nousresearch.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Visit Nous Research — opens in a new tab"
-          >
-            <Image
-              src="/nous-research-art.webp"
-              alt="Nous Research"
-              width={110}
-              height={112}
-              sizes="(max-width: 640px) 84px, 110px"
-            />
-            <span className="nous-copy">
-              <small>POWERING THE HERMES ECOSYSTEM</small>
-              <strong>Explore open-source AI from Nous Research.</strong>
-              <span>Models, research, and tools built to make advanced AI more open and useful.</span>
-            </span>
-            <span className="nous-link">Visit Nous Research <ArrowIcon /></span>
-          </a>
-          <AgentSoulTeam agents={agents} />
-          <div className="workflow-line" data-reveal="">
-            <span>Idea</span><i /><span>Decompose</span><i /><span>Research + build</span><i /><span>Review</span><i /><span>Working result</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="now section-shell">
-        <p className="section-number">04 / NOW</p>
-        <div className="now-grid">
-          <h2 data-reveal="">Currently<br />in motion.</h2>
-          <div className="now-list">
-            <div data-reveal=""><span>01</span><p>Building agentic portfolio management</p></div>
-            <div data-reveal=""><span>02</span><p>Exploring durable multi-agent workflows</p></div>
-            <div data-reveal=""><span>03</span><p>Improving how AI systems collaborate with people</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section className="contact" id="contact">
-        <div className="section-shell contact-inner">
-          <p className="section-number light">05 / CONTACT</p>
-          <h2 data-reveal="">Have an interesting<br />problem?</h2>
-          <p data-reveal="">I&apos;m always interested in thoughtful software, AI experiments, and ambitious technical ideas to solve real world problems.</p>
-          <a className="contact-link" data-reveal="" href="mailto:tan1995_@hotmail.com">Start a conversation <ArrowIcon /></a>
-          <div className="contact-details" data-reveal="">
-            <a className="contact-phone" href="tel:+6581610164">
-              <strong>+65 81610164</strong>
+            <AgentSoulTeam agents={agents} />
+            <ol className="workflow-line" data-reveal="" aria-label="How a request moves through the team">
+              {workflowSteps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <a
+              className="nous-recommendation"
+              data-reveal=""
+              href="https://nousresearch.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit Nous Research (opens in a new tab)"
+            >
+              <Image src="/nous-research-art.webp" alt="" width={110} height={112} sizes="(max-width: 640px) 72px, 88px" />
+              <span className="nous-copy">
+                <small>Powering the Hermes ecosystem</small>
+                <strong>Explore open-source AI from Nous Research.</strong>
+                <span>Models, research, and tools built to make advanced AI more open and useful.</span>
+              </span>
+              <span className="nous-link">Visit Nous Research <ArrowUpRightIcon /></span>
             </a>
-            <div className="contact-socials" aria-label="Social profiles">
-              <a href="https://github.com/Koktongkt" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile"><GithubIcon /></a>
-              <a href="https://x.com/KT2596612580139" target="_blank" rel="noopener noreferrer" aria-label="X profile"><XIcon /></a>
-              <a href="https://www.linkedin.com/in/kok-tong-tan-01b219159/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile"><LinkedinIcon /></a>
+          </div>
+        </section>
+
+        <section className="now" id="now">
+          <div className="section-shell">
+            <p className="section-number"><span>04</span>Now</p>
+            <div className="now-grid">
+              <h2 data-reveal="">Currently<br />in motion.</h2>
+              <ol className="now-list">
+                {nowItems.map((item, index) => (
+                  <li key={item} data-reveal="">
+                    <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+                    <p>{item}</p>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <footer className="footer section-shell">
-        <p>Designed and built by KT with hermes.</p>
-      </footer>
-    </main>
+        <section className="contact" id="contact">
+          <div className="section-shell">
+            <div className="contact-panel">
+              <p className="section-number light"><span>05</span>Contact</p>
+              <h2 data-reveal="">Have an interesting<br />problem?</h2>
+              <p className="contact-lede" data-reveal="">I&apos;m always interested in thoughtful software, AI experiments, and ambitious technical ideas to solve real world problems.</p>
+              <div className="contact-actions" data-reveal="">
+                <a className="contact-link" href={`mailto:${site.email}`}>Start a conversation <ArrowIcon /></a>
+                <CopyEmail email={site.email} />
+              </div>
+              <div className="contact-details" data-reveal="">
+                <a className="contact-phone" href={site.phone.href}>
+                  <span>Phone</span>
+                  <strong>{site.phone.label}</strong>
+                </a>
+                <SocialLinks className="contact-socials" />
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <SiteFooter />
+    </>
   );
 }
